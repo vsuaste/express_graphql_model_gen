@@ -1,0 +1,8 @@
+module.exports = `
+
+  type <%- name -%> {
+    <% for (var key in attributes) { %>
+      <%= key %>: <%= attributes[key] -%>
+    <% } %>
+  }
+`;
