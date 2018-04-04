@@ -8,13 +8,13 @@ module.exports = `
 
   type Query {
     <%- namePl -%>: [<%- name -%>]
-    read<%- name -%>(id: ID): <%- name -%>
+    read<%- name -%>(id: ID): <%- name %>
   }
 
   type Mutation {
     add<%- name -%>( <%- attributesStr -%> ): <%- name -%>!
     delete<%- name -%>(id: ID!): String!
-    update<%- name -%>(<%- attributesStr -%>): <%- name -%>
+    update<%- name -%>(<%- attributesStr -%>): <%- name %>
   }
 
 `;

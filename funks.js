@@ -33,6 +33,10 @@ attributesToString = function(attributes){
   return str_attributes.slice(0,-2);
 }
 
+/*
+  Generates GraphQL Schema Type, Query, Mutation
+  given the json schema
+*/
 module.exports.generateSchema = async function(schema){
 
     let dataSchema = parseFile(schema);
@@ -52,4 +56,30 @@ module.exports.generateSchema = async function(schema){
       });
 
     return 'Schema ' + dataSchema.model + ' written into ' + __dirname + '/generated_files/schemas/ succesfully!' ;
+}
+
+/*
+  Generates Sequelize model given the json schema
+*/
+module.exports.generateModel = async function(schema){
+
+  let dataSchema = parseFile(schema);
+  let opts = {
+    name : dataSchema.model,
+    namePl: inflection.pluralize(dataSchema.model.toLowerCase()),
+    nameLc: dataSchema.model.toLowerCase(),
+    attributes: dataSchema.attributes,
+    attributesStr: attributesToString(dataSchema.attributes)
+  }
+
+  let generatedSchema = await generateJs('create-sequelize-schema' , opts);
+
+  //write file to specific directory
+  fs.writeFile(__dirname + '/generated_files/models/' + dataSchema.model + '.js' , generatedSchema, function(err) {
+    if (err)
+      return console.log(err);
+    });
+
+  return 'Schema ' + dataSchema.model + ' written into ' + __dirname + '/generated_files/models/ succesfully!' ;
+
 }

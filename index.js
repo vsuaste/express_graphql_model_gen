@@ -15,8 +15,12 @@ program
       output will be a statement that the schema was generated succesfully
       or error otherwise
     */
-    let output = await funks.generateSchema(jfile);
-    console.log(output);
+    let out_graphql_schema = await funks.generateSchema(jfile);
+    console.log(out_graphql_schema);
+
+    let out_sequelize_schema = await funks.generateModel(jfile);
+    console.log(out_sequelize_schema);
+
   });
 
 program.parse(process.argv);
