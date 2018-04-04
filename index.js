@@ -1,8 +1,6 @@
 const program = require('commander');
 
 const funks = require('./funks');
-// Require logic.js file and extract controller functions using JS destructuring assignment
-//const { addContact, getContact } = require('./logic');
 
 program
   .version('0.0.1')

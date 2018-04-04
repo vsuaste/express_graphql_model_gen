@@ -1,6 +1,7 @@
 var fs = require('fs');
 const path = require('path');
 const ejs = require('ejs');
+const inflection = require('inflection');
 const jsb = require('js-beautify').js_beautify;
 const {promisify} = require('util');
 const ejsRenderFile = promisify( ejs.renderFile );
@@ -21,12 +22,25 @@ generateJs = async function(templateName, options) {
   return prettyStr;
 }
 
+attributesToString = function(attributes){
+
+  let str_attributes="";
+  for(key in attributes)
+  {
+    str_attributes+= key + ': ' + attributes[key] + ', '
+  }
+
+  return str_attributes.slice(0,-2);
+}
+
 module.exports.generateSchema = async function(schema){
 
     let dataSchema = parseFile(schema);
     let opts = {
       name : dataSchema.model,
-      attributes: dataSchema.attributes
+      namePl: inflection.pluralize(dataSchema.model.toLowerCase()),
+      attributes: dataSchema.attributes,
+      attributesStr: attributesToString(dataSchema.attributes)
     }
 
     let generatedSchema = await generateJs('create-graphql-schema' , opts);
