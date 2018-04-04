@@ -1,0 +1,104 @@
+const{<%- nameLc -%>} = require('../models/<%- nameLc -%>');
+const jwt =  require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const searchArg = require('../utils/search-argument');
+
+var secret = 'something-secret';
+
+
+ module.exports = {
+
+   <%- namePl -%>: function(_,context){
+
+    let token = context.request.headers["authorization"];
+    try{
+      //get person id from context
+      let decoded = jwt.verify(token, secret);
+      //check for permissions of that person.id
+      let allowed = context.acl.isAllowed(decoded.id , '<%- nameLc -%>' ,'get');
+      if(allowed){
+          return <%- nameLc -%>.findAll();
+      }else{
+        console.log("Permission denied");
+        return null;
+      }
+    }catch(err){
+      console.log("Invalid token");
+      return  null;
+    }
+  },
+
+  readAll: function({input}){
+
+    let arg = new searchArg(input);
+    let arg_sequelize = arg.toSequelize();
+    return <%- nameLc -%>.findAll({where: arg_sequelize});
+
+  },
+
+  read<%- name -%>: function({id}){
+    return <%- nameLc -%>.findOne({where: {id: id}, include:[{all: true}]});
+  },
+
+  add<%- name -%>: function({input}, context){
+
+      let hashedPassword = bcrypt.hashSync(password, 8);
+      return <%- nameLc -%>.create(input).
+      then( <%- nameLc -%> =>{
+        <%- nameLc -%>.token = jwt.sign({ id: <%- nameLc -%>.id, role: <%- nameLc -%>.role }, secret, {
+          expiresIn: 86400 // expires in 24 hours
+          });
+        context.acl.addUserRoles(<%- nameLc -%>.id,<%- nameLc -%>.role);
+        return <%- nameLc -%>;
+      });
+  },
+
+  delete<%- name -%>: function({id}, context){
+
+    let token = context.request.headers["authorization"];
+    try{
+        //get person id from context
+        let decoded = jwt.verify(token, secret);
+        //check for permissions of that person.id
+        let allowed = context.acl.isAllowed(decoded.id , '<%- nameLc -%>' ,'delete');
+        if(allowed){
+          return <%- nameLc -%>
+            .findById(id)
+            .then( <%- nameLc -%> =>{
+                return <%- nameLc -%>
+                .destroy()
+                .then(()=>{return 'Item succesfully deleted';});
+              });
+          }else{
+            return "Permission denied";
+          }
+      }catch(err){
+        return "invalid token";
+      }
+  },
+
+  update<%- name -%>: function({input},context){
+
+    let token = context.request.headers["authorization"];
+    try{
+      //get person id from context
+      let decoded = jwt.verify(token, secret);
+      //check for permissions of that person.id
+      let allowed = context.acl.isAllowed(decoded.id , '<%- nameLc -%>' ,'update');
+      if(allowed){
+        return <%- nameLc -%>
+        .findById(id)
+        .then( <%- nameLc -%> => {
+          return <%- nameLc -%>.update(input)
+        });
+      }else{
+        console.log("Permission denied");
+        return null;
+      }
+    }catch(err){
+      console.log("Invalid token");
+      return null;
+    }
+
+  }
+}

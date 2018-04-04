@@ -21,6 +21,8 @@ program
     let out_sequelize_schema = await funks.generateModel(jfile);
     console.log(out_sequelize_schema);
 
+    let out_resolvers = await funks.generateResolvers(jfile);
+    console.log(out_resolvers);
   });
 
 program.parse(process.argv);

@@ -68,8 +68,7 @@ module.exports.generateModel = async function(schema){
     name : dataSchema.model,
     namePl: inflection.pluralize(dataSchema.model.toLowerCase()),
     nameLc: dataSchema.model.toLowerCase(),
-    attributes: dataSchema.attributes,
-    attributesStr: attributesToString(dataSchema.attributes)
+    attributes: dataSchema.attributes
   }
 
   let generatedSchema = await generateJs('create-sequelize-schema' , opts);
@@ -80,6 +79,33 @@ module.exports.generateModel = async function(schema){
       return console.log(err);
     });
 
-  return 'Schema ' + dataSchema.model + ' written into ' + __dirname + '/generated_files/models/ succesfully!' ;
+  return 'Model ' + dataSchema.model + ' written into ' + __dirname + '/generated_files/models/ succesfully!' ;
+
+}
+
+/*
+  Generates Resolvers (basic CRUD operations) for the model given
+  in the json schema
+*/
+module.exports.generateResolvers = async function(schema){
+
+  let dataSchema = parseFile(schema);
+  let opts = {
+    name : dataSchema.model,
+    namePl: inflection.pluralize(dataSchema.model.toLowerCase()),
+    nameLc: dataSchema.model.toLowerCase(),
+    attributes: dataSchema.attributes,
+  }
+
+  let generatedResolvers = await generateJs('create-resolvers' , opts);
+
+  //write file to specific directory
+  fs.writeFile(__dirname + '/generated_files/resolvers/' + dataSchema.model + '.js' , generatedResolvers, function(err) {
+    if (err)
+      return console.log(err);
+    });
+
+  return 'Resolvers ' + dataSchema.model + ' written into ' + __dirname + '/generated_files/resolvers/ succesfully!' ;
+
 
 }
