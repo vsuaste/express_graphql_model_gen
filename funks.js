@@ -107,5 +107,62 @@ module.exports.generateResolvers = async function(schema){
 
   return 'Resolvers ' + dataSchema.model + ' written into ' + __dirname + '/generated_files/resolvers/ succesfully!' ;
 
+}
+
+module.exports.writeSchemaCommons = function(){
+
+  let commons = `module.exports = \`
+
+  enum Operator{
+    like
+    or
+    and
+    eq
+    between
+    in
+  }
+
+  input typeValue{
+    type: String
+    value: String!
+  }
+
+\`;`;
+
+  fs.writeFile(__dirname + '/generated_files/schemas/' +  'commons.js' , commons, function(err) {
+    if (err)
+      return console.log(err);
+    });
+}
+
+
+module.exports.generateTests = async function(jsonSchema){
+  let dataSchema = parseFile(jsonSchema);
+  let opts = {
+    name : dataSchema.model,
+    namePl: inflection.pluralize(dataSchema.model.toLowerCase()),
+    nameLc: dataSchema.model.toLowerCase(),
+    attributes: dataSchema.attributes,
+    attributesStr: attributesToString(dataSchema.attributes)
+  }
+
+  let generatedSchema = await generateJs('create-graphql-schema' , opts);
+  fs.writeFile(__dirname + '/tests' +  '/created-schema.js' , generatedSchema, function(err) {
+    if (err)
+      return console.log(err);
+    });
+
+  let generatedModel = await generateJs('create-sequelize-schema' , opts);
+  fs.writeFile(__dirname + '/tests' +  '/created-model.js' , generatedModel, function(err) {
+    if (err)
+      return console.log(err);
+    });
+
+  let generatedResolvers = await generateJs('create-resolvers' , opts);
+  fs.writeFile(__dirname + '/tests' +  '/created-resolvers.js' , generatedResolvers, function(err) {
+    if (err)
+      return console.log(err);
+    });
+
 
 }

@@ -1,104 +1,52 @@
-const{<%- nameLc -%>} = require('../models/<%- nameLc -%>');
-const jwt =  require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
+/*
+    Resolvers for basic CRUD operations
+*/
+
+const{<%-  nameLc  -%>} = require('../models/<%- nameLc -%>');
 const searchArg = require('../utils/search-argument');
 
-var secret = 'something-secret';
-
-
- module.exports = {
-
-   <%- namePl -%>: function(_,context){
-
-    let token = context.request.headers["authorization"];
-    try{
-      //get person id from context
-      let decoded = jwt.verify(token, secret);
-      //check for permissions of that person.id
-      let allowed = context.acl.isAllowed(decoded.id , '<%- nameLc -%>' ,'get');
-      if(allowed){
-          return <%- nameLc -%>.findAll();
-      }else{
-        console.log("Permission denied");
-        return null;
-      }
-    }catch(err){
-      console.log("Invalid token");
-      return  null;
-    }
+module.exports = {
+  <%- namePl -%>: function(_,context){
+    return <%- nameLc -%>.findAll();
   },
 
-  readAll: function({input}){
-
+  search<%- name -%>: function({input}){
     let arg = new searchArg(input);
     let arg_sequelize = arg.toSequelize();
     return <%- nameLc -%>.findAll({where: arg_sequelize});
-
   },
 
-  read<%- name -%>: function({id}){
+  readOne<%- name -%>: function({id}){
     return <%- nameLc -%>.findOne({where: {id: id}, include:[{all: true}]});
   },
 
-  add<%- name -%>: function({input}, context){
-
-      let hashedPassword = bcrypt.hashSync(password, 8);
-      return <%- nameLc -%>.create(input).
-      then( <%- nameLc -%> =>{
-        <%- nameLc -%>.token = jwt.sign({ id: <%- nameLc -%>.id, role: <%- nameLc -%>.role }, secret, {
-          expiresIn: 86400 // expires in 24 hours
-          });
-        context.acl.addUserRoles(<%- nameLc -%>.id,<%- nameLc -%>.role);
-        return <%- nameLc -%>;
-      });
+  add<%- name -%>: function({<%for(var key in attributes){-%><%=key-%>,<%}-%>}, context){
+    return <%- nameLc -%>.create({<%for(var key in attributes){-%><%=key-%>,<%}-%>})
+    .then( <%- nameLc -%> =>{
+      return <%- nameLc -%>;
+    });
   },
 
   delete<%- name -%>: function({id}, context){
-
-    let token = context.request.headers["authorization"];
-    try{
-        //get person id from context
-        let decoded = jwt.verify(token, secret);
-        //check for permissions of that person.id
-        let allowed = context.acl.isAllowed(decoded.id , '<%- nameLc -%>' ,'delete');
-        if(allowed){
-          return <%- nameLc -%>
-            .findById(id)
-            .then( <%- nameLc -%> =>{
-                return <%- nameLc -%>
-                .destroy()
-                .then(()=>{return 'Item succesfully deleted';});
-              });
-          }else{
-            return "Permission denied";
-          }
-      }catch(err){
-        return "invalid token";
-      }
+    return <%- nameLc -%>
+      .findById(id)
+      .then( <%- nameLc -%> =>{
+        return <%- nameLc -%>
+          .destroy()
+          .then(()=>{return 'Item succesfully deleted';});
+        });
   },
 
-  update<%- name -%>: function({input},context){
-
-    let token = context.request.headers["authorization"];
-    try{
-      //get person id from context
-      let decoded = jwt.verify(token, secret);
-      //check for permissions of that person.id
-      let allowed = context.acl.isAllowed(decoded.id , '<%- nameLc -%>' ,'update');
-      if(allowed){
-        return <%- nameLc -%>
-        .findById(id)
-        .then( <%- nameLc -%> => {
-          return <%- nameLc -%>.update(input)
+  update<%- name -%>: function({
+    id,<%for(var key in attributes){-%><%=key-%>,<%}-%>},context){
+    return <%- nameLc -%>
+      .findById(id)
+      .then( <%- nameLc -%> => {
+          return <%- nameLc -%>.update({<%for(var key in attributes){-%>
+            <%=key-%>: <%=key-%> || <%- nameLc-%>.<%=key-%>,
+            <%}-%>})
         });
-      }else{
-        console.log("Permission denied");
-        return null;
-      }
-    }catch(err){
-      console.log("Invalid token");
-      return null;
-    }
+
 
   }
 }

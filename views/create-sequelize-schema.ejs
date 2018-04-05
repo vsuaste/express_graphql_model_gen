@@ -5,7 +5,7 @@ const <%- name -%> = connection.define('<%- nameLc -%>',{
   <% for (var key in attributes) { %>
     <%= key %>: {
         type: Sequelize.<%= attributes[key].toUpperCase() %>
-    }
+    },
   <% } %>
 });
 

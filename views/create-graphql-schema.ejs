@@ -1,20 +1,33 @@
-module.exports = `
 
-  type <%- name -%> {
-    <% for (var key in attributes) { %>
-      <%= key %>: <%= attributes[key] -%>
-    <% } %>
+module.exports = `
+  type <%- name -%>
+  {<% for (var key in attributes) { %>
+    <%= key %>: <%= attributes[key] -%>
+  <% } %>
+  }
+
+  enum <%- name -%>Field {
+    id <%for (var key in attributes) {%>
+    <%= key -%>
+  <% }%>
+  }
+
+  input search<%- name -%>Input {
+    field: <%- name -%>Field
+    value: typeValue
+    operator: Operator
+    searchArg: [search<%- name -%>Input]
   }
 
   type Query {
     <%- namePl -%>: [<%- name -%>]
-    read<%- name -%>(id: ID): <%- name %>
+    search<%- name -%>(input: search<%- name -%>Input): [<%- name -%>]
+    readOne<%- name -%>(id: ID): <%- name %>
   }
 
   type Mutation {
-    add<%- name -%>( <%- attributesStr -%> ): <%- name -%>!
+    add<%- name -%>( <%- attributesStr -%> ): <%- name -%>
     delete<%- name -%>(id: ID!): String!
-    update<%- name -%>(<%- attributesStr -%>): <%- name %>
-  }
-
+    update<%- name -%>(id: ID!, <%- attributesStr -%>): <%- name %>!
+}
 `;

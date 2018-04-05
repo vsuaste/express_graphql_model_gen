@@ -23,6 +23,9 @@ program
 
     let out_resolvers = await funks.generateResolvers(jfile);
     console.log(out_resolvers);
+
+    funks.writeSchemaCommons();
+
   });
 
 program.parse(process.argv);

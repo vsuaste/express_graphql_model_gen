@@ -1,0 +1,8 @@
+{
+  "model" : "Person",
+  "attributes" : {
+    "firstName" : "String",
+    "lastName" : "String",
+    "email" : "String"
+  }
+}
