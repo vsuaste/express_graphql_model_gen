@@ -26,7 +26,7 @@ module.exports = `
   }
 
   type Mutation {
-    add<%- name -%>( <%- attributesStr -%> ): <%- name -%>
+    add<%- name -%>( <%- attributesStr -%> ): <%- name %>
     delete<%- name -%>(id: ID!): String!
     update<%- name -%>(id: ID!, <%- attributesStr -%>): <%- name %>!
 }

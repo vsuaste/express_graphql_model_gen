@@ -1,5 +1,5 @@
 const program = require('commander');
-
+var fs = require('fs');
 const funks = require('./funks');
 
 program
@@ -7,25 +7,28 @@ program
   .description('Code generator for GraphQL server');
 
 program
-  .command('--generate <json-file>')
+  .command('--generate <json-files-folder>')
   .alias('g')
   .description('Generate code for all models described in the input json file (json-file)')
-  .action(async(jfile) => {
-    /*
-      output will be a statement that the schema was generated succesfully
-      or error otherwise
-    */
-    let out_graphql_schema = await funks.generateSchema(jfile);
-    console.log(out_graphql_schema);
+  .action((json_dir) => {
 
-    let out_sequelize_schema = await funks.generateModel(jfile);
-    console.log(out_sequelize_schema);
+      fs.readdirSync(json_dir).forEach( async (json_file) => {
+        //console.log(json_file);
+        /*
+          output will be a statement that the schema was generated succesfully
+          or error otherwise
+        */
+        let out_graphql_schema = await funks.generateSchema(json_dir+'/'+json_file);
+        console.log(out_graphql_schema);
 
-    let out_resolvers = await funks.generateResolvers(jfile);
-    console.log(out_resolvers);
+        let out_sequelize_schema = await funks.generateModel(json_dir+'/'+json_file);
+        console.log(out_sequelize_schema);
 
-    funks.writeSchemaCommons();
+        let out_resolvers = await funks.generateResolvers(json_dir+'/'+json_file);
+        console.log(out_resolvers);
+        });
 
+      funks.writeSchemaCommons();
   });
 
 program.parse(process.argv);
