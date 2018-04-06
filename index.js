@@ -12,32 +12,37 @@ program
   .description('Generate code for all models described in the input json file (json-file)')
   .action((json_dir, dir_write) => {
 
-    dir_write = (dir_write===undefined) ? __dirname : dir_write;
+      dir_write = (dir_write===undefined) ? __dirname : dir_write;
+      let sections = ['schemas', 'resolvers', 'models'];
+      let models = [];
+      // creates one folder for each of schemas, resolvers, models
+      sections.forEach( (section) => {
+          fs.mkdirSync(dir_write+'/'+section);
+      });
 
-      fs.mkdirSync(dir_write+"/models");
-      fs.mkdirSync(dir_write+"/resolvers");
-      fs.mkdirSync(dir_write+"/schemas");
-
+      // creates schema, resolvers and model for each json file provided
       fs.readdirSync(json_dir).forEach( async (json_file) => {
 
-        funks.generateSchema(json_dir+'/'+json_file, dir_write)
-        .then( () => {
-          console.log('Schema ' + json_file + ' written into ' + dir_write + '/schemas/ succesfully!');
-        });
+          let opts = funks.getOpts(json_dir+'/'+json_file);
+          models.push([opts.name , opts.namePl]);
 
-        funks.generateModel(json_dir+'/'+json_file, dir_write)
-        .then( () => {
-          console.log('Model ' + json_file + ' written into ' + dir_write + '/models/ succesfully!');
-        });
-
-        funks.generateResolvers(json_dir+'/'+json_file, dir_write)
-        .then( () => {
-          console.log('Resolvers ' + json_file + ' written into ' + dir_write + '/resolvers/ succesfully!');
-        });
-
+          sections.forEach((section) =>{
+              let file_name = dir_write + '/'+ section +'/' + opts.nameLc + '.js';
+              funks.generateSection(section, opts, file_name)
+              .then( () => {
+                  console.log(file_name + ' written succesfully!');
+              });
+          });
       });
 
       funks.writeSchemaCommons();
+
+      //write resolvers index for all models
+      let index_resolvers_file = dir_write + '/resolvers/index.js';
+      funks.generateSection('resolvers-index',{models: models} ,index_resolvers_file)
+      .then( () => {
+        console.log('resolvers-index written succesfully!');
+      });
   });
 
 program.parse(process.argv);

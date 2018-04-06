@@ -33,80 +33,30 @@ attributesToString = function(attributes){
   return str_attributes.slice(0,-2);
 }
 
-/*
-  Generates GraphQL Schema Type, Query, Mutation
-  given the json schema
-*/
-module.exports.generateSchema = async function(schema, dir_write){
 
-    let dataSchema = parseFile(schema);
-    let opts = {
-      name : dataSchema.model,
-      namePl: inflection.pluralize(dataSchema.model.toLowerCase()),
-      attributes: dataSchema.attributes,
-      attributesStr: attributesToString(dataSchema.attributes)
-    }
-
-    let generatedSchema = await generateJs('create-graphql-schema' , opts);
-
-    //write file to specific directory
-    fs.writeFile(dir_write + '/schemas/' + dataSchema.model + '.js' , generatedSchema, function(err) {
-      if (err)
-      {
-        return console.log(err);
-      }
-    });
-}
-
-/*
-  Generates Sequelize model given the json schema
-*/
-module.exports.generateModel = async function(schema, dir_write){
-
-  let dataSchema = parseFile(schema);
+module.exports.getOpts = function(jsonFile){
+  let dataModel = parseFile(jsonFile);
   let opts = {
-    name : dataSchema.model,
-    namePl: inflection.pluralize(dataSchema.model.toLowerCase()),
-    nameLc: dataSchema.model.toLowerCase(),
-    attributes: dataSchema.attributes
+    name : dataModel.model,
+    nameLc: dataModel.model.toLowerCase(),
+    namePl: inflection.pluralize(dataModel.model.toLowerCase()),
+    attributes: dataModel.attributes,
+    attributesStr: attributesToString(dataModel.attributes)
   }
 
-  let generatedSchema = await generateJs('create-sequelize-schema' , opts);
-
-  //write file to specific directory
-  fs.writeFile(dir_write + '/models/' + dataSchema.model + '.js' , generatedSchema, function(err) {
-    if (err){
-      return console.log(err);
-    }
-  });
+  return opts;
 }
 
-/*
-  Generates Resolvers (basic CRUD operations) for the model given
-  in the json schema
-*/
-module.exports.generateResolvers = async function(schema, dir_write){
 
-  let dataSchema = parseFile(schema);
-  let opts = {
-    name : dataSchema.model,
-    namePl: inflection.pluralize(dataSchema.model.toLowerCase()),
-    nameLc: dataSchema.model.toLowerCase(),
-    attributes: dataSchema.attributes,
-  }
-
-  let generatedResolvers = await generateJs('create-resolvers' , opts);
-
-  //write file to specific directory
-  fs.writeFile(dir_write + '/resolvers/' + dataSchema.model + '.js' , generatedResolvers, function(err) {
+module.exports.generateSection = async function(section, opts, dir_write )
+{
+  let generatedSection = await generateJs('create-'+section ,opts);
+  fs.writeFile(dir_write, generatedSection, function(err) {
     if (err)
     {
       return console.log(err);
     }
   });
-
-
-
 }
 
 module.exports.writeSchemaCommons = function(){
@@ -135,7 +85,6 @@ module.exports.writeSchemaCommons = function(){
     });
 }
 
-
 module.exports.generateTests = async function(jsonSchema){
   let dataSchema = parseFile(jsonSchema);
   let opts = {
@@ -163,6 +112,4 @@ module.exports.generateTests = async function(jsonSchema){
     if (err)
       return console.log(err);
     });
-
-
 }
