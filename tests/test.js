@@ -34,7 +34,3 @@ funks.generateTests(__dirname + '/sample-test.json').then(()=>{
     });
 
 });
-
-
-
-//testing();

@@ -37,7 +37,7 @@ attributesToString = function(attributes){
   Generates GraphQL Schema Type, Query, Mutation
   given the json schema
 */
-module.exports.generateSchema = async function(schema){
+module.exports.generateSchema = async function(schema, dir_write){
 
     let dataSchema = parseFile(schema);
     let opts = {
@@ -50,18 +50,18 @@ module.exports.generateSchema = async function(schema){
     let generatedSchema = await generateJs('create-graphql-schema' , opts);
 
     //write file to specific directory
-    fs.writeFile(__dirname + '/generated_files/schemas/' + dataSchema.model + '.js' , generatedSchema, function(err) {
+    fs.writeFile(dir_write + '/schemas/' + dataSchema.model + '.js' , generatedSchema, function(err) {
       if (err)
+      {
         return console.log(err);
-      });
-
-    return 'Schema ' + dataSchema.model + ' written into ' + __dirname + '/generated_files/schemas/ succesfully!' ;
+      }
+    });
 }
 
 /*
   Generates Sequelize model given the json schema
 */
-module.exports.generateModel = async function(schema){
+module.exports.generateModel = async function(schema, dir_write){
 
   let dataSchema = parseFile(schema);
   let opts = {
@@ -74,20 +74,18 @@ module.exports.generateModel = async function(schema){
   let generatedSchema = await generateJs('create-sequelize-schema' , opts);
 
   //write file to specific directory
-  fs.writeFile(__dirname + '/generated_files/models/' + dataSchema.model + '.js' , generatedSchema, function(err) {
-    if (err)
+  fs.writeFile(dir_write + '/models/' + dataSchema.model + '.js' , generatedSchema, function(err) {
+    if (err){
       return console.log(err);
-    });
-
-  return 'Model ' + dataSchema.model + ' written into ' + __dirname + '/generated_files/models/ succesfully!' ;
-
+    }
+  });
 }
 
 /*
   Generates Resolvers (basic CRUD operations) for the model given
   in the json schema
 */
-module.exports.generateResolvers = async function(schema){
+module.exports.generateResolvers = async function(schema, dir_write){
 
   let dataSchema = parseFile(schema);
   let opts = {
@@ -100,12 +98,14 @@ module.exports.generateResolvers = async function(schema){
   let generatedResolvers = await generateJs('create-resolvers' , opts);
 
   //write file to specific directory
-  fs.writeFile(__dirname + '/generated_files/resolvers/' + dataSchema.model + '.js' , generatedResolvers, function(err) {
+  fs.writeFile(dir_write + '/resolvers/' + dataSchema.model + '.js' , generatedResolvers, function(err) {
     if (err)
+    {
       return console.log(err);
-    });
+    }
+  });
 
-  return 'Resolvers ' + dataSchema.model + ' written into ' + __dirname + '/generated_files/resolvers/ succesfully!' ;
+
 
 }
 
