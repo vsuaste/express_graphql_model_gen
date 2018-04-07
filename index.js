@@ -13,7 +13,7 @@ program
   .action((json_dir, dir_write) => {
 
       dir_write = (dir_write===undefined) ? __dirname : dir_write;
-      let sections = ['schemas', 'resolvers', 'models'];
+      let sections = ['schemas', 'resolvers', 'models', 'migrations'];
       let models = [];
       // creates one folder for each of schemas, resolvers, models
       sections.forEach( (section) => {
@@ -27,7 +27,14 @@ program
           models.push([opts.name , opts.namePl]);
 
           sections.forEach((section) =>{
-              let file_name = dir_write + '/'+ section +'/' + opts.nameLc + '.js';
+              let file_name = "";
+              if(section==='migrations')
+              {
+                file_name = funks.createNameMigration(dir_write,opts.nameLc);
+              }else{
+                file_name = dir_write + '/'+ section +'/' + opts.nameLc + '.js';
+              }
+
               funks.generateSection(section, opts, file_name)
               .then( () => {
                   console.log(file_name + ' written succesfully!');

@@ -59,6 +59,13 @@ module.exports.generateSection = async function(section, opts, dir_write )
   });
 }
 
+module.exports.createNameMigration = function(dir_write, model_name)
+{
+  let date = new Date();
+   date = date.toISOString().slice(0,19).replace(/[^0-9]/g, "");
+  return dir_write + '/migrations/' + date + '-create-'+model_name +'.js';
+}
+
 module.exports.writeSchemaCommons = function(){
 
   let commons = `module.exports = \`
