@@ -66,7 +66,7 @@ module.exports.createNameMigration = function(dir_write, model_name)
   return dir_write + '/migrations/' + date + '-create-'+model_name +'.js';
 }
 
-module.exports.writeSchemaCommons = function(){
+module.exports.writeSchemaCommons = function(dir_write){
 
   let commons = `module.exports = \`
 
@@ -86,7 +86,7 @@ module.exports.writeSchemaCommons = function(){
 
 \`;`;
 
-  fs.writeFile(__dirname + '/generated_files/schemas/' +  'commons.js' , commons, function(err) {
+  fs.writeFile(dir_write + '/schemas/' +  'commons.js' , commons, function(err) {
     if (err)
       return console.log(err);
     });

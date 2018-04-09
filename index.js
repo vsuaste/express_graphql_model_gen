@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const program = require('commander');
 var fs = require('fs');
 const funks = require('./funks');
@@ -9,7 +11,7 @@ program
 program
   .command('--generate <json-files-folder> [dir_to_write]')
   .alias('g')
-  .description('Generate code for all models described in the input json file (json-file)')
+  .description('Generate code for each model described by each input json file in the \'json-files-folder\'')
   .action((json_dir, dir_write) => {
 
       dir_write = (dir_write===undefined) ? __dirname : dir_write;
@@ -42,7 +44,7 @@ program
           });
       });
 
-      funks.writeSchemaCommons();
+      funks.writeSchemaCommons(dir_write);
 
       //write resolvers index for all models
       let index_resolvers_file = dir_write + '/resolvers/index.js';
