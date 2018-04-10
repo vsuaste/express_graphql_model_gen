@@ -19,7 +19,10 @@ program
       let models = [];
       // creates one folder for each of schemas, resolvers, models
       sections.forEach( (section) => {
+        if(!fs.existsSync(dir_write+'/'+section))
+        {
           fs.mkdirSync(dir_write+'/'+section);
+        }
       });
 
       // creates schema, resolvers and model for each json file provided
