@@ -1,0 +1,7 @@
+{
+  "model" : "Dog",
+  "attributes" : {
+    "name" : "String",
+    "breed" : "String"
+  }
+}
