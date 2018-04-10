@@ -7,6 +7,7 @@ will use to perform CRUD operations for each model created.
 Clone the repository and run:
 ```
 $ npm install
+$ npm link
 ```
 
 ## Usage:
