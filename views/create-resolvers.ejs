@@ -2,7 +2,7 @@
     Resolvers for basic CRUD operations
 */
 
-const{<%-  nameLc  -%>} = require('../models/<%- nameLc -%>');
+const <%-  nameLc  -%> = require('../models/index').<%- nameLc -%>;
 const searchArg = require('../utils/search-argument');
 
 module.exports = {

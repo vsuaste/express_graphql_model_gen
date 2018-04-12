@@ -47,7 +47,7 @@ program
           });
       });
 
-      funks.writeSchemaCommons(dir_write);
+      funks.writeCommons(dir_write);
 
       //write resolvers index for all models
       let index_resolvers_file = dir_write + '/resolvers/index.js';

@@ -1,12 +1,13 @@
+'use strict';
 
-const {connection} = require('../connection');
+module.exports = function(sequelize, DataTypes){
+  var <%- name -%> = sequelize.define('<%- nameLc -%>',{
+    <% for (var key in attributes) { %>
+      <%= key %>: {
+          type: Sequelize.<%= attributes[key].toUpperCase() %>
+      },
+    <% } %>
+  });
 
-const <%- name -%> = connection.define('<%- nameLc -%>',{
-  <% for (var key in attributes) { %>
-    <%= key %>: {
-        type: Sequelize.<%= attributes[key].toUpperCase() %>
-    },
-  <% } %>
-});
-
-module.exports.<%- nameLc -%> = <%- name -%>;
+  return <%- name -%>;
+};

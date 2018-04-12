@@ -34,6 +34,67 @@ attributesToString = function(attributes){
 }
 
 
+writeSchemaCommons = function(dir_write){
+
+  let commons = `module.exports = \`
+
+  enum Operator{
+    like
+    or
+    and
+    eq
+    between
+    in
+  }
+
+  input typeValue{
+    type: String
+    value: String!
+  }
+
+\`;`;
+
+  fs.writeFile(dir_write + '/schemas/' +  'commons.js' , commons, function(err) {
+    if (err)
+      return console.log(err);
+    });
+}
+
+writeIndexModelsCommons = function(dir_write){
+
+  let index =  `
+      const fs = require('fs');
+      const path = require('path')
+      sequelize = require('../connection');
+
+      var models = {};
+
+      //grabs all the models in your models folder, adds them to the models object
+      fs.readdirSync(__dirname)
+      .filter(function(file) {
+        return (file.indexOf('.') !== 0) && (file !== 'index.js') && (file.slice(-3) === '.js');
+      })
+      .forEach(function(file) {
+        var model = sequelize['import'](path.join(__dirname, file));
+        models[model.name] = model;
+      });
+      //Important: creates associations based on associations defined in associate function in the model files
+      Object.keys(models).forEach(function(modelName) {
+        if (models[modelName].associate) {
+          models[modelName].associate(models);
+        }
+      });
+
+      module.exports = models;
+  `;
+
+  fs.writeFile(dir_write + '/models/' +  'index.js' , index, function(err) {
+    if (err)
+      return console.log(err);
+    });
+}
+
+
 module.exports.getOpts = function(jsonFile){
   let dataModel = parseFile(jsonFile);
   let opts = {
@@ -66,30 +127,9 @@ module.exports.createNameMigration = function(dir_write, model_name)
   return dir_write + '/migrations/' + date + '-create-'+model_name +'.js';
 }
 
-module.exports.writeSchemaCommons = function(dir_write){
-
-  let commons = `module.exports = \`
-
-  enum Operator{
-    like
-    or
-    and
-    eq
-    between
-    in
-  }
-
-  input typeValue{
-    type: String
-    value: String!
-  }
-
-\`;`;
-
-  fs.writeFile(dir_write + '/schemas/' +  'commons.js' , commons, function(err) {
-    if (err)
-      return console.log(err);
-    });
+module.exports.writeCommons = function(dir_write){
+  writeSchemaCommons(dir_write);
+  writeIndexModelsCommons(dir_write);
 }
 
 module.exports.generateTests = async function(jsonSchema){
