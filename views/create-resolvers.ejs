@@ -20,8 +20,8 @@ module.exports = {
     return <%- nameLc -%>.findOne({where: {id: id}, include:[{all: true}]});
   },
 
-  add<%- name -%>: function({<%for(var key in attributes){-%><%=key-%>,<%}-%>}, context){
-    return <%- nameLc -%>.create({<%for(var key in attributes){-%><%=key-%>,<%}-%>})
+  add<%- name -%>: function(input, context){
+    return <%- nameLc -%>.create(input)
     .then( <%- nameLc -%> =>{
       return <%- nameLc -%>;
     });
@@ -37,16 +37,11 @@ module.exports = {
         });
   },
 
-  update<%- name -%>: function({
-    id,<%for(var key in attributes){-%><%=key-%>,<%}-%>},context){
+  update<%- name -%>: function(input,context){
     return <%- nameLc -%>
       .findById(id)
       .then( <%- nameLc -%> => {
-          return <%- nameLc -%>.update({<%for(var key in attributes){-%>
-            <%=key-%>: <%=key-%> || <%- nameLc-%>.<%=key-%>,
-            <%}-%>})
+          return <%- nameLc -%>.update(input);
         });
-
-
   }
 }

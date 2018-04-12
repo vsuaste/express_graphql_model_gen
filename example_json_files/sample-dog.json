@@ -3,5 +3,15 @@
   "attributes" : {
     "name" : "String",
     "breed" : "String"
+  },
+  "foreign_attributes" :{
+    "personId": "Int"
+  },
+  "associations" : {
+    "belongsTo" : [
+      {
+        "target" : "Person"
+      }
+    ]
   }
 }

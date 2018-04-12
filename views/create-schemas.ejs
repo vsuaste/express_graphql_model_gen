@@ -4,6 +4,9 @@ module.exports = `
   {<% for (var key in attributes) { %>
     <%= key %>: <%= attributes[key] -%>
   <% } %>
+  <% for (var key in assoc_attributes) { %>
+    <%= key %>: <%= assoc_attributes[key] -%>
+  <% } %>
   }
 
   enum <%- name -%>Field {
@@ -26,8 +29,8 @@ module.exports = `
   }
 
   type Mutation {
-    add<%- name -%>( <%- attributesStr -%> ): <%- name %>
+    add<%- name -%>( <%- attributesStr -%> <% if (foreign_attributesStr !==""){-%> ,<%= foreign_attributesStr %>  <%}-%> ): <%- name %>
     delete<%- name -%>(id: ID!): String!
-    update<%- name -%>(id: ID!, <%- attributesStr -%>): <%- name %>!
+    update<%- name -%>(id: ID!, <%- attributesStr -%> <% if (foreign_attributesStr !==""){-%> ,<%= foreign_attributesStr %>  <%}-%>): <%- name %>!
 }
 `;

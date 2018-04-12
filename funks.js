@@ -23,8 +23,9 @@ generateJs = async function(templateName, options) {
 }
 
 attributesToString = function(attributes){
-
   let str_attributes="";
+  if(attributes==='undefined') return str_attributes;
+
   for(key in attributes)
   {
     str_attributes+= key + ': ' + attributes[key] + ', '
@@ -63,29 +64,29 @@ writeSchemaCommons = function(dir_write){
 writeIndexModelsCommons = function(dir_write){
 
   let index =  `
-      const fs = require('fs');
-      const path = require('path')
-      sequelize = require('../connection');
+  const fs = require('fs');
+  const path = require('path')
+  sequelize = require('../connection');
 
-      var models = {};
+  var models = {};
 
-      //grabs all the models in your models folder, adds them to the models object
-      fs.readdirSync(__dirname)
-      .filter(function(file) {
-        return (file.indexOf('.') !== 0) && (file !== 'index.js') && (file.slice(-3) === '.js');
-      })
-      .forEach(function(file) {
-        var model = sequelize['import'](path.join(__dirname, file));
-        models[model.name] = model;
-      });
-      //Important: creates associations based on associations defined in associate function in the model files
-      Object.keys(models).forEach(function(modelName) {
-        if (models[modelName].associate) {
-          models[modelName].associate(models);
-        }
-      });
+  //grabs all the models in your models folder, adds them to the models object
+  fs.readdirSync(__dirname)
+  .filter(function(file) {
+    return (file.indexOf('.') !== 0) && (file !== 'index.js') && (file.slice(-3) === '.js');
+  })
+  .forEach(function(file) {
+    var model = sequelize['import'](path.join(__dirname, file));
+    models[model.name] = model;
+  });
+  //Important: creates associations based on associations defined in associate function in the model files
+  Object.keys(models).forEach(function(modelName) {
+    if (models[modelName].associate) {
+      models[modelName].associate(models);
+    }
+  });
 
-      module.exports = models;
+  module.exports = models;
   `;
 
   fs.writeFile(dir_write + '/models/' +  'index.js' , index, function(err) {
@@ -102,7 +103,11 @@ module.exports.getOpts = function(jsonFile){
     nameLc: dataModel.model.toLowerCase(),
     namePl: inflection.pluralize(dataModel.model.toLowerCase()),
     attributes: dataModel.attributes,
-    attributesStr: attributesToString(dataModel.attributes)
+    assoc_attributes: (dataModel.assoc_attributes==='undefined' ? []: dataModel.assoc_attributes),
+    foreign_attributes: (dataModel.foreign_attributes==='undefined' ? []: dataModel.foreign_attributes),
+    attributesStr: attributesToString(dataModel.attributes),
+    foreign_attributesStr: attributesToString(dataModel.foreign_attributes),
+    associations: dataModel.associations
   }
 
   return opts;
