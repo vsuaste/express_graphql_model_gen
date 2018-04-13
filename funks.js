@@ -97,6 +97,18 @@ writeIndexModelsCommons = function(dir_write){
     });
 }
 
+module.exports.addAssociations = function(associations, summary_associations, source_model)
+{
+    //console.log(typeof associations);
+    if(typeof associations === 'object')
+    {
+      Object.entries(associations).forEach(([key, value])=>{
+        value.forEach( association => {
+          summary_associations[key].push([source_model, association.target]);
+        });
+      });
+    }
+}
 
 module.exports.getOpts = function(jsonFile){
   let dataModel = parseFile(jsonFile);

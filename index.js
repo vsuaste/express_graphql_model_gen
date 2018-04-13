@@ -17,6 +17,11 @@ program
       dir_write = (dir_write===undefined) ? __dirname : dir_write;
       let sections = ['schemas', 'resolvers', 'models', 'migrations'];
       let models = [];
+      let summary_associations = {
+        "belongsTo" : [],
+        "hasMany" : [],
+        "hasOne" : []
+      };
       // creates one folder for each of schemas, resolvers, models
       sections.forEach( (section) => {
         if(!fs.existsSync(dir_write+'/'+section))
@@ -30,6 +35,8 @@ program
 
           let opts = funks.getOpts(json_dir+'/'+json_file);
           models.push([opts.name , opts.namePl]);
+
+          funks.addAssociations( opts.associations, summary_associations, opts.name);
 
           sections.forEach((section) =>{
               let file_name = "";
@@ -55,6 +62,7 @@ program
       .then( () => {
         console.log('resolvers-index written succesfully!');
       });
+      //console.log(summary_associations);
   });
 
 program.parse(process.argv);
