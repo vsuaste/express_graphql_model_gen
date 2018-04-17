@@ -6,12 +6,5 @@
   },
   "foreign_attributes" :{
     "personId": "Int"
-  },
-  "associations" : {
-    "belongsTo" : [
-      {
-        "target" : "Person"
-      }
-    ]
   }
 }

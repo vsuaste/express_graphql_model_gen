@@ -62,6 +62,11 @@ program
       .then( () => {
         console.log('resolvers-index written succesfully!');
       });
+
+      funks.generateAssociationsMigrations(summary_associations,dir_write);
+      //.then( () => {
+      //  console.log('association-migrations written succesfully!');
+      //});
       //console.log(summary_associations);
   });
 

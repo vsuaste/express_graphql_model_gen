@@ -127,6 +127,47 @@ module.exports.getOpts = function(jsonFile){
   return opts;
 }
 
+/*
+  info_association[0] <-- source model
+  info_association[1] <-- target model
+*/
+getAssociationOpts = function(association_type, info_association)
+{
+  opts = {};
+  if(association_type === 'belongsTo')
+  {
+    opts['source_table'] = inflection.pluralize(info_association[0].toLowerCase());
+    opts['target_table'] = inflection.pluralize(info_association[1].toLowerCase());
+    opts['foreign_key'] = info_association[1].toLowerCase() + 'Id';
+  }else{ // support for hasMany and hasOne associations
+    opts['source_table'] = inflection.pluralize(info_association[1].toLowerCase());
+    opts['target_table'] = inflection.pluralize(info_association[0].toLowerCase());
+    opts['foreign_key'] = info_association[0].toLowerCase() + 'Id';
+  }
+  return opts;
+}
+
+/*
+  TODO: support for belongsToMany association
+*/
+module.exports.generateAssociationsMigrations =  function( summary_associations, dir_write)
+{
+  Object.entries(summary_associations).forEach(([key, value]) => {
+    value.forEach( async (association) => {
+      let opts = getAssociationOpts(key, association);
+      let generatedMigration = await generateJs('create-association-migration',opts);
+      let name_migration = module.exports.createNameMigration(dir_write, 'z-column-'+opts.foreign_key+'-to-'+opts.source_table);
+      console.log(generatedMigration);
+      console.log(name_migration);
+      fs.writeFile( name_migration, generatedMigration, function(err){
+        if (err)
+        {
+          return console.log(err);
+        }
+      });
+    });
+  });
+}
 
 module.exports.generateSection = async function(section, opts, dir_write )
 {
@@ -143,7 +184,8 @@ module.exports.createNameMigration = function(dir_write, model_name)
 {
   let date = new Date();
    date = date.toISOString().slice(0,19).replace(/[^0-9]/g, "");
-  return dir_write + '/migrations/' + date + '-create-'+model_name +'.js';
+  //return dir_write + '/migrations/' + date + '-create-'+model_name +'.js';
+  return dir_write + '/migrations/' + date + '-'+model_name +'.js';
 }
 
 module.exports.writeCommons = function(dir_write){
