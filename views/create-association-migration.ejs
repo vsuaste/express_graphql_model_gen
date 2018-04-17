@@ -1,0 +1,20 @@
+'use strict';
+
+module.exports = {
+
+    up: function(queryInterface, Sequelize) {
+        return queryInterface.addColumn('<%= source_table %>', '<%= foreign_key %>',{
+               type: Sequelize.INTEGER,
+               references: {
+                 model: '<%=target_table %>',
+                 key: 'id'
+               }
+
+        });
+    },
+
+    down: function(queryInterface, Sequelize) {
+      return queryInterface.removeColumn('<%= source_table %>', '<%= foreign_key %>');
+    }
+
+};
