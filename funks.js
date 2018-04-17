@@ -194,29 +194,22 @@ module.exports.writeCommons = function(dir_write){
 }
 
 module.exports.generateTests = async function(jsonSchema){
-  let dataSchema = parseFile(jsonSchema);
-  let opts = {
-    name : dataSchema.model,
-    namePl: inflection.pluralize(dataSchema.model.toLowerCase()),
-    nameLc: dataSchema.model.toLowerCase(),
-    attributes: dataSchema.attributes,
-    attributesStr: attributesToString(dataSchema.attributes)
-  }
+  let opts = module.exports.getOpts(jsonSchema);
 
-  let generatedSchema = await generateJs('create-graphql-schema' , opts);
-  fs.writeFile(__dirname + '/tests' +  '/created-schema.js' , generatedSchema, function(err) {
+  let generatedSchema = await generateJs('create-schemas' , opts);
+  fs.writeFile(__dirname + '/test' +  '/created-schema.js' , generatedSchema, function(err) {
     if (err)
       return console.log(err);
     });
 
-  let generatedModel = await generateJs('create-sequelize-schema' , opts);
-  fs.writeFile(__dirname + '/tests' +  '/created-model.js' , generatedModel, function(err) {
+  let generatedModel = await generateJs('create-models' , opts);
+  fs.writeFile(__dirname + '/test' +  '/created-model.js' , generatedModel, function(err) {
     if (err)
       return console.log(err);
     });
 
   let generatedResolvers = await generateJs('create-resolvers' , opts);
-  fs.writeFile(__dirname + '/tests' +  '/created-resolvers.js' , generatedResolvers, function(err) {
+  fs.writeFile(__dirname + '/test' +  '/created-resolvers.js' , generatedResolvers, function(err) {
     if (err)
       return console.log(err);
     });

@@ -1,0 +1,18 @@
+{
+  "model" : "Person",
+  "attributes" : {
+    "firstName" : "String",
+    "lastName" : "String",
+    "email" : "String"
+  },
+  "assoc_attributes" : {
+    "dogs": "[Dog]"
+  },
+  "associations" : {
+    "hasMany" : [
+      {
+        "target" : "Dog"
+      }
+    ]
+  }
+}
