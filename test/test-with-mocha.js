@@ -12,7 +12,7 @@ describe('Generated code', function(){
     fs.readFile(__dirname + '/created-schema.js', 'utf8', (err, data) =>{
       let test_graphql =  test.graphql.replace(/\s/g, '');
       let created_graphql = data.replace(/\s/g, '');
-      expect(5).to.be.equal(5);
+      expect(created_graphql).to.be.equal(test_graphql);
     });
   });
 
