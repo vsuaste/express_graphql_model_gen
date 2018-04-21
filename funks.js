@@ -157,8 +157,6 @@ module.exports.generateAssociationsMigrations =  function( summary_associations,
       let opts = getAssociationOpts(key, association);
       let generatedMigration = await generateJs('create-association-migration',opts);
       let name_migration = module.exports.createNameMigration(dir_write, 'z-column-'+opts.foreign_key+'-to-'+opts.source_table);
-      console.log(generatedMigration);
-      console.log(name_migration);
       fs.writeFile( name_migration, generatedMigration, function(err){
         if (err)
         {

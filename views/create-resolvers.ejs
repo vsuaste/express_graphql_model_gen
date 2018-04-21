@@ -4,44 +4,74 @@
 
 const <%-  nameLc  -%> = require('../models/index').<%- nameLc -%>;
 const searchArg = require('../utils/search-argument');
+var checkAuthorization = require('../utils/check-authorization');
 
 module.exports = {
-  <%- namePl -%>: function(_,context){
-    return <%- nameLc -%>.findAll();
+  <%- namePl -%>: function(_, context){
+    if(checkAuthorization(context,'<%- namePl -%>', 'read')==true){
+      return <%- nameLc -%>.findAll();
+    }else{
+        return "You don't have authorization to perform this action";
+      }
   },
 
-  search<%- name -%>: function({input}){
-    let arg = new searchArg(input);
-    let arg_sequelize = arg.toSequelize();
-    return <%- nameLc -%>.findAll({where: arg_sequelize});
+  search<%- name -%>: function({input}, context){
+    if(checkAuthorization(context, '<%- namePl -%>', 'read')==true)
+    {
+      let arg = new searchArg(input);
+      let arg_sequelize = arg.toSequelize();
+      return <%- nameLc -%>.findAll({where: arg_sequelize});
+    }else{
+        return "You don't have authorization to perform this action";
+      }
   },
 
-  readOne<%- name -%>: function({id}){
-    return <%- nameLc -%>.findOne({where: {id: id}, include:[{all: true}]});
+  readOne<%- name -%>: function({id}, context){
+    if(checkAuthorization(context, '<%- namePl -%>', 'read')==true)
+    {
+      return <%- nameLc -%>.findOne({where: {id: id}, include:[{all: true}]});
+    }else{
+        return "You don't have authorization to perform this action";
+      }
   },
 
   add<%- name -%>: function(input, context){
-    return <%- nameLc -%>.create(input)
-    .then( <%- nameLc -%> =>{
-      return <%- nameLc -%>;
-    });
+    if(checkAuthorization(context,'<%- namePl -%>','create')==true)
+    {
+      return <%- nameLc -%>.create(input)
+      .then( <%- nameLc -%> =>{
+        return <%- nameLc -%>;
+      });
+    }else{
+        return "You don't have authorization to perform this action";
+      }
   },
 
   delete<%- name -%>: function({id}, context){
-    return <%- nameLc -%>
-      .findById(id)
-      .then( <%- nameLc -%> =>{
-        return <%- nameLc -%>
-          .destroy()
-          .then(()=>{return 'Item succesfully deleted';});
-        });
+    if(checkAuthorization(context,'<%- namePl -%>','delete')==true)
+    {
+      return <%- nameLc -%>
+        .findById(id)
+        .then( <%- nameLc -%> =>{
+          return <%- nameLc -%>
+            .destroy()
+            .then(()=>{return 'Item succesfully deleted';});
+          });
+    }else{
+        return "You don't have authorization to perform this action";
+      }
   },
 
-  update<%- name -%>: function(input,context){
-    return <%- nameLc -%>
-      .findById(id)
-      .then( <%- nameLc -%> => {
-          return <%- nameLc -%>.update(input);
-        });
+  update<%- name -%>: function(input, context){
+    if(checkAuthorization(context,'<%- namePl -%>','update')==true)
+    {
+      return <%- nameLc -%>
+        .findById(id)
+        .then( <%- nameLc -%> => {
+            return <%- nameLc -%>.update(input);
+          });
+    }else{
+        return "You don't have authorization to perform this action";
+      }
   }
 }
