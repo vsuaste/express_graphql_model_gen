@@ -32,6 +32,7 @@ module.exports = `
     add<%- name -%>( <%- attributesStr -%> <% if (foreign_attributesStr !==""){-%> ,<%= foreign_attributesStr %>  <%}-%> ): <%- name %>
     delete<%- name -%>(id: ID!): String!
     update<%- name -%>(id: ID!, <%- attributesStr -%> <% if (foreign_attributesStr !==""){-%> ,<%= foreign_attributesStr %>  <%}-%>): <%- name %>!
+    bulkAdd<%- name -%>Xlsx: [<%- name -%>]
     bulkAdd<%- name -%>Csv: [<%- name -%>]
 }
 `;

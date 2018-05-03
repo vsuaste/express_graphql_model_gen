@@ -48,6 +48,11 @@ module.exports = {
       }
   },
 
+  bulkAdd<%- name -%>Xlsx: function(_, context){
+    let xlsxObjs = fileTools.parseXlsx(context.request.files.xlsx_file.data.toString('binary'));
+    return <%- nameLc -%>.bulkCreate(xlsxObjs, {validate: true});
+  },
+
   bulkAdd<%- name -%>Csv: function(_, context){
     //delim = context.request.body.delim;
     //cols = context.request.body.cols;

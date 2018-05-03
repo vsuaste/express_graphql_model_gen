@@ -10,6 +10,7 @@ module.exports = {
     add<%= models[i][0] -%>: resolvers<%= models[i][0]%>.add<%= models[i][0] -%>,
     delete<%= models[i][0] -%>: resolvers<%= models[i][0]%>.delete<%= models[i][0] -%>,
     update<%= models[i][0] -%>: resolvers<%= models[i][0]%>.update<%= models[i][0] %>,
-    
+    bulkAdd<%= models[i][0] -%>Csv: resolvers<%= models[i][0]%>.bulkAdd<%= models[i][0] -%>Csv ,
+    bulkAdd<%= models[i][0] -%>Xlsx: resolvers<%= models[i][0]%>.bulkAdd<%= models[i][0] -%>Xlsx,
   <%}-%>
 };
