@@ -4,6 +4,7 @@
 
 const <%-  nameLc  -%> = require('../models/index').<%- nameLc -%>;
 const searchArg = require('../utils/search-argument');
+const fileTools =  require('../utils/file-tools');
 var checkAuthorization = require('../utils/check-authorization');
 
 module.exports = {
@@ -45,6 +46,13 @@ module.exports = {
     }else{
         return "You don't have authorization to perform this action";
       }
+  },
+
+  bulkAdd<%- name -%>Csv: function(_, context){
+    //delim = context.request.body.delim;
+    //cols = context.request.body.cols;
+    return fileTools.parseCsv(context.request.files.csv_file.data.toString())
+    .then((csvObjs)=> {return <%- nameLc -%>.bulkCreate(csvObjs, {validate: true}); });
   },
 
   delete<%- name -%>: function({id}, context){
