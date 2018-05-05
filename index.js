@@ -41,13 +41,14 @@ program
       });
 
       // creates schema, resolvers and model for each json file provided (second iteration over json files)
-      /*
+
       fs.readdirSync(json_dir).forEach( async (json_file) => {
 
           let opts = funks.getOpts(json_dir+'/'+json_file);
 
-          funks.addAssociations( opts.associations, summary_associations, opts.name);
-
+          //funks.addAssociations( opts.associations, summary_associations, opts.name);
+          funks.concatenateExtraAttributes(opts,attributes_schema[opts.name]);
+          console.log(opts);
           sections.forEach((section) =>{
               let file_name = "";
               if(section==='migrations')
@@ -63,7 +64,7 @@ program
               });
           });
       });
-
+      /*
       funks.writeCommons(dir_write);
 
       //write resolvers index for all models

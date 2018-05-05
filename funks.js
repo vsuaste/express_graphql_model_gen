@@ -147,6 +147,17 @@ fillAttributesHasManyOne = function(source_model,association,attributes_schema)
 
 }
 
+module.exports.concatenateExtraAttributes = function(opts, model_extra_attributes) {
+  if(model_extra_attributes === undefined)
+  {
+    opts["foreign_attributesStr"]="";
+    opts["assoc_attributes"]={};
+  }else{
+    opts["foreign_attributesStr"] = attributesToString(model_extra_attributes.mutations);
+    opts["assoc_attributes"] = model_extra_attributes.schema;
+  }
+}
+
 module.exports.getAllAttributesForSchema = function(opts, attributes_schema)
 {
   let associations = opts.associations;
@@ -187,7 +198,7 @@ module.exports.getOpts = function(jsonFile){
     attributes: dataModel.attributes,
     //assoc_attributes: (dataModel.assoc_attributes==='undefined' ? []: dataModel.assoc_attributes),
     //foreign_attributes: (dataModel.foreign_attributes==='undefined' ? []: dataModel.foreign_attributes),
-    //attributesStr: attributesToString(dataModel.attributes),
+    attributesStr: attributesToString(dataModel.attributes),
     //foreign_attributesStr: attributesToString(dataModel.foreign_attributes),
     associations: (dataModel.associations===undefined ? [] : dataModel.associations)
   }
