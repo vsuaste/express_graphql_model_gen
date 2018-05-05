@@ -18,20 +18,16 @@ program
       let sections = ['schemas', 'resolvers', 'models', 'migrations'];
       let models = [];
       let attributes_schema = {};
-      let summary_associations = {
-        "belongsTo" : [],
-        "hasMany" : [],
-        "hasOne" : []
-      };
+      let summary_associations = [];
+
       // creates one folder for each of schemas, resolvers, models
-      /*
       sections.forEach( (section) => {
         if(!fs.existsSync(dir_write+'/'+section))
         {
           fs.mkdirSync(dir_write+'/'+section);
         }
       });
-      */
+
       //get associations information (first iteration over json files)
       fs.readdirSync(json_dir).forEach((json_file) => {
           let opts = funks.getOpts(json_dir+'/'+json_file);
@@ -46,7 +42,7 @@ program
 
           let opts = funks.getOpts(json_dir+'/'+json_file);
 
-          //funks.addAssociations( opts.associations, summary_associations, opts.name);
+          funks.addAssociations( opts.associations, summary_associations, opts.table);
           funks.concatenateExtraAttributes(opts,attributes_schema[opts.name]);
           console.log(opts);
           sections.forEach((section) =>{
@@ -64,7 +60,7 @@ program
               });
           });
       });
-      /*
+
       funks.writeCommons(dir_write);
 
       //write resolvers index for all models
@@ -75,8 +71,7 @@ program
       });
 
       funks.generateAssociationsMigrations(summary_associations,dir_write);
-      //funks.generateGraphqlSchemas();
-      */
+
   });
 
 program.parse(process.argv);

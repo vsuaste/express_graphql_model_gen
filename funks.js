@@ -176,15 +176,29 @@ module.exports.getAllAttributesForSchema = function(opts, attributes_schema)
 }
 
 
-module.exports.addAssociations = function(associations, summary_associations, source_model)
+module.exports.addAssociations = function(associations, summary_associations, source_table)
 {
-    //console.log(typeof associations);
-    if(typeof associations === 'object')
+    if(!(associations===undefined))
     {
-      Object.entries(associations).forEach(([key, value])=>{
-        value.forEach( association => {
-          summary_associations[key].push([source_model, association.target]);
-        });
+      associations.forEach((association) => {
+        if(association.type === 'belongsTo')
+        {
+          summary_associations.push(
+            {
+              "source_table" : source_table,
+              "target_table" : association.target_table,
+              "foreign_key" : Object.keys(association.foreign_key)[0]
+            }
+          );
+        }else if(association.type === 'hasMany' || association.type === 'hasOne' ){
+          summary_associations.push(
+            {
+              "source_table" : association.target_table,
+              "target_table" : source_table,
+              "foreign_key" : Object.keys(association.foreign_key)[0]
+            }
+          );
+        }
       });
     }
 }
@@ -193,36 +207,14 @@ module.exports.getOpts = function(jsonFile){
   let dataModel = parseFile(jsonFile);
   let opts = {
     name : dataModel.model,
+    table : dataModel.table,
     nameLc: dataModel.model.toLowerCase(),
     namePl: inflection.pluralize(dataModel.model.toLowerCase()),
     attributes: dataModel.attributes,
-    //assoc_attributes: (dataModel.assoc_attributes==='undefined' ? []: dataModel.assoc_attributes),
-    //foreign_attributes: (dataModel.foreign_attributes==='undefined' ? []: dataModel.foreign_attributes),
     attributesStr: attributesToString(dataModel.attributes),
-    //foreign_attributesStr: attributesToString(dataModel.foreign_attributes),
     associations: (dataModel.associations===undefined ? [] : dataModel.associations)
   }
 
-  return opts;
-}
-
-/*
-  info_association[0] <-- source model
-  info_association[1] <-- target model
-*/
-getAssociationOpts = function(association_type, info_association)
-{
-  opts = {};
-  if(association_type === 'belongsTo')
-  {
-    opts['source_table'] = inflection.pluralize(info_association[0].toLowerCase());
-    opts['target_table'] = inflection.pluralize(info_association[1].toLowerCase());
-    opts['foreign_key'] = info_association[1].toLowerCase() + 'Id';
-  }else{ // support for hasMany and hasOne associations
-    opts['source_table'] = inflection.pluralize(info_association[1].toLowerCase());
-    opts['target_table'] = inflection.pluralize(info_association[0].toLowerCase());
-    opts['foreign_key'] = info_association[0].toLowerCase() + 'Id';
-  }
   return opts;
 }
 
@@ -231,17 +223,14 @@ getAssociationOpts = function(association_type, info_association)
 */
 module.exports.generateAssociationsMigrations =  function( summary_associations, dir_write)
 {
-  Object.entries(summary_associations).forEach(([key, value]) => {
-    value.forEach( async (association) => {
-      let opts = getAssociationOpts(key, association);
-      let generatedMigration = await generateJs('create-association-migration',opts);
-      let name_migration = module.exports.createNameMigration(dir_write, 'z-column-'+opts.foreign_key+'-to-'+opts.source_table);
-      fs.writeFile( name_migration, generatedMigration, function(err){
-        if (err)
-        {
-          return console.log(err);
-        }
-      });
+  summary_associations.forEach( async (assoc_migration) =>{
+    let generatedMigration = await generateJs('create-association-migration',assoc_migration);
+    let name_migration = module.exports.createNameMigration(dir_write, 'z-column-'+assoc_migration.foreign_key+'-to-'+assoc_migration.source_table);
+    fs.writeFile( name_migration, generatedMigration, function(err){
+      if (err)
+      {
+        return console.log(err);
+      }
     });
   });
 }
