@@ -17,24 +17,34 @@ program
       dir_write = (dir_write===undefined) ? __dirname : dir_write;
       let sections = ['schemas', 'resolvers', 'models', 'migrations'];
       let models = [];
+      let attributes_schema = {};
       let summary_associations = {
         "belongsTo" : [],
         "hasMany" : [],
         "hasOne" : []
       };
       // creates one folder for each of schemas, resolvers, models
+      /*
       sections.forEach( (section) => {
         if(!fs.existsSync(dir_write+'/'+section))
         {
           fs.mkdirSync(dir_write+'/'+section);
         }
       });
+      */
+      //get associations information (first iteration over json files)
+      fs.readdirSync(json_dir).forEach((json_file) => {
+          let opts = funks.getOpts(json_dir+'/'+json_file);
+          models.push([opts.name , opts.namePl]);
+          funks.getAllAttributesForSchema(opts,attributes_schema);
+          console.log(attributes_schema);
+      });
 
-      // creates schema, resolvers and model for each json file provided
+      // creates schema, resolvers and model for each json file provided (second iteration over json files)
+      /*
       fs.readdirSync(json_dir).forEach( async (json_file) => {
 
           let opts = funks.getOpts(json_dir+'/'+json_file);
-          models.push([opts.name , opts.namePl]);
 
           funks.addAssociations( opts.associations, summary_associations, opts.name);
 
@@ -64,10 +74,8 @@ program
       });
 
       funks.generateAssociationsMigrations(summary_associations,dir_write);
-      //.then( () => {
-      //  console.log('association-migrations written succesfully!');
-      //});
-      //console.log(summary_associations);
+      //funks.generateGraphqlSchemas();
+      */
   });
 
 program.parse(process.argv);

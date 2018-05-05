@@ -97,6 +97,74 @@ writeIndexModelsCommons = function(dir_write){
     });
 }
 
+//association belongsTo only modify the source model
+fillAttributesBelongsTo = function(source_model,association,attributes_schema)
+{
+  let name_attribute = association.as;
+  if(attributes_schema.hasOwnProperty(source_model))
+  {
+    //push the attribute related to associations to the ones existing
+    attributes_schema[source_model]["schema"][name_attribute] = association.target;
+    Object.assign(attributes_schema[source_model]["mutations"], association.foreign_key);
+
+  }else{
+    //insert model for the first time and set attributes related to associations
+    attributes_schema[source_model] = {
+        "schema" : { [name_attribute] : association.target},
+        "mutations" :  association.foreign_key
+    };
+  }
+}
+
+//associations hasMany and hasOne modify both source and target models
+fillAttributesHasManyOne = function(source_model,association,attributes_schema)
+{
+  let name_attribute = association.as;
+  let type_attribute = association.target;
+  type_attribute = (association.type === 'hasMany' ?  '['+ type_attribute +']': type_attribute);
+
+  if(attributes_schema.hasOwnProperty(source_model))
+  {
+    //push the attribute related to associations
+    attributes_schema[source_model]["schema"][association.as] = type_attribute;
+  }else{
+    //insert model for the first time and set attributes
+    attributes_schema[source_model] = {
+        "schema" : { [name_attribute] : type_attribute },
+        "mutations" : {}
+    };
+  }
+
+  if(attributes_schema.hasOwnProperty(association.target))
+  {
+    Object.assign(attributes_schema[association.target]["mutations"], association.foreign_key);
+  }else{
+    attributes_schema[association.target] = {
+      "schema" : {},
+      "mutations" : association.foreign_key
+    }
+  }
+
+}
+
+module.exports.getAllAttributesForSchema = function(opts, attributes_schema)
+{
+  let associations = opts.associations;
+  let source_model = opts.name;
+
+  associations.forEach((association)=>{
+    //depending on the type of association the foreign_key can go
+    //in the source_model or target_model
+    if(association.type === 'belongsTo')
+    {
+      fillAttributesBelongsTo(source_model,association,attributes_schema);
+    }else if(association.type === 'hasOne'|| association.type === 'hasMany'){
+      fillAttributesHasManyOne(source_model,association,attributes_schema);
+    }
+  });
+}
+
+
 module.exports.addAssociations = function(associations, summary_associations, source_model)
 {
     //console.log(typeof associations);
@@ -117,11 +185,11 @@ module.exports.getOpts = function(jsonFile){
     nameLc: dataModel.model.toLowerCase(),
     namePl: inflection.pluralize(dataModel.model.toLowerCase()),
     attributes: dataModel.attributes,
-    assoc_attributes: (dataModel.assoc_attributes==='undefined' ? []: dataModel.assoc_attributes),
-    foreign_attributes: (dataModel.foreign_attributes==='undefined' ? []: dataModel.foreign_attributes),
-    attributesStr: attributesToString(dataModel.attributes),
-    foreign_attributesStr: attributesToString(dataModel.foreign_attributes),
-    associations: dataModel.associations
+    //assoc_attributes: (dataModel.assoc_attributes==='undefined' ? []: dataModel.assoc_attributes),
+    //foreign_attributes: (dataModel.foreign_attributes==='undefined' ? []: dataModel.foreign_attributes),
+    //attributesStr: attributesToString(dataModel.attributes),
+    //foreign_attributesStr: attributesToString(dataModel.foreign_attributes),
+    associations: (dataModel.associations===undefined ? [] : dataModel.associations)
   }
 
   return opts;
