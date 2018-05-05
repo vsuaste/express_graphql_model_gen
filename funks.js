@@ -261,6 +261,9 @@ module.exports.writeCommons = function(dir_write){
 
 module.exports.generateTests = async function(jsonSchema){
   let opts = module.exports.getOpts(jsonSchema);
+  let attributes_schema = {};
+  module.exports.getAllAttributesForSchema(opts,attributes_schema);
+  module.exports.concatenateExtraAttributes(opts,attributes_schema[opts.name]);
 
   let generatedSchema = await generateJs('create-schemas' , opts);
   fs.writeFile(__dirname + '/test' +  '/created-schema.js' , generatedSchema, function(err) {
