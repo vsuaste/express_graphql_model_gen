@@ -87,7 +87,7 @@ writeIndexModelsCommons = function(dir_write){
   });
   //update tables with association (temporary, just for testing purposes)
   //this part is suppose to be done in the migration file
-  sequelize.sync({force: true});
+  //sequelize.sync({force: true});
   module.exports = models;
   `;
 

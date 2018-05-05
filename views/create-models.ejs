@@ -10,11 +10,9 @@ module.exports = function(sequelize, DataTypes){
   });
 
   <%- name -%>.associate = function(models){
-    <% for (var key in associations) { %>
-      <% for(let i=0; i < associations[key].length; i++){ %>
-        <%- name -%>.<%= key %>(models.<%= associations[key][i].target.toLowerCase() %>);
+      <% for(let i=0; i < associations.length; i++){ %>
+        <%- name -%>.<%= associations[i].type %>(models.<%= associations[i].target.toLowerCase() %>);
       <% } %>
-    <% } %>
   };
 
   return <%- name -%>;

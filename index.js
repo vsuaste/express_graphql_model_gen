@@ -44,7 +44,7 @@ program
 
           funks.addAssociations( opts.associations, summary_associations, opts.table);
           funks.concatenateExtraAttributes(opts,attributes_schema[opts.name]);
-          console.log(opts);
+          //console.log(opts);
           sections.forEach((section) =>{
               let file_name = "";
               if(section==='migrations')
