@@ -3,17 +3,18 @@
 const program = require('commander');
 var fs = require('fs');
 const funks = require('./funks');
+console.log("Generating files...");
 
 program
   .version('0.0.1')
   .description('Code generator for GraphQL server');
 
 program
-  .command('--generate <json-files-folder> [dir_to_write]')
+  .command('generate <json-files-folder> [dir_to_write]')
   .alias('g')
   .description('Generate code for each model described by each input json file in the \'json-files-folder\'')
   .action((json_dir, dir_write) => {
-
+      console.log("Generating files...");
       dir_write = (dir_write===undefined) ? __dirname : dir_write;
       let sections = ['schemas', 'resolvers', 'models', 'migrations'];
       let models = [];

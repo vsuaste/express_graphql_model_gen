@@ -1,5 +1,6 @@
 {
   "model" : "Person",
+  "table" : "people",
   "attributes" : {
     "firstName" : "String",
     "lastName" : "String",
@@ -8,11 +9,15 @@
   "assoc_attributes" : {
     "dogs": "[Dog]"
   },
-  "associations" : {
-    "hasMany" : [
-      {
-        "target" : "Dog"
-      }
-    ]
-  }
+  "associations" : [
+    {
+      "type" : "hasMany",
+      "target" : "Dog",
+      "target_table" : "dogs",
+      "as" : "dogs",
+      "foreign_key" : {
+            "personId" : "Int"
+        }
+    }
+  ]
 }
