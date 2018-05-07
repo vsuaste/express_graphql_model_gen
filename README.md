@@ -13,7 +13,11 @@ $ npm link
 ## Usage:
 
 ```
-$ code-generator --generate <input-json-files> <output-directory>
+$ code-generator generate <input-json-files> <output-directory>
+```
+or with the alias:
+```
+$ code-generator g <input-json-files> <output-directory>
 ```
 
 ```
