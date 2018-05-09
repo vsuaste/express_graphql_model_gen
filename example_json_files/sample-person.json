@@ -6,9 +6,6 @@
     "lastName" : "String",
     "email" : "String"
   },
-  "assoc_attributes" : {
-    "dogs": "[Dog]"
-  },
   "associations" : [
     {
       "type" : "hasMany",
