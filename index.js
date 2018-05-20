@@ -19,7 +19,7 @@ program
       let sections = ['schemas', 'resolvers', 'models', 'migrations'];
       let models = [];
       let attributes_schema = {};
-      let summary_associations = [];
+      let summary_associations = {'one-many': [], 'many-many': {}};
 
       // creates one folder for each of schemas, resolvers, models
       sections.forEach( (section) => {

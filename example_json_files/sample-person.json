@@ -15,6 +15,20 @@
       "foreign_key" : {
             "personId" : "Int"
         }
+    },
+
+    {
+      "type" : "belongsToMany",
+      "target" : "Book",
+      "target_table" : "books",
+      "as" : "books",
+      "cross_table" : "books_to_people",
+      "source_key" : {
+            "personId" : "Int"
+        },
+      "target_key" : {
+          "dogId" : "Int"
+      }
     }
   ]
 }

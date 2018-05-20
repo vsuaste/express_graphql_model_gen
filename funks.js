@@ -116,6 +116,20 @@ fillAttributesBelongsTo = function(source_model,association,attributes_schema)
   }
 }
 
+//association belongsToMany only modify the source model and only the schema (no mutations)
+fillAttributesBelongsToMany = function(source_model,association,attributes_schema)
+{
+  if(attributes_schema.hasOwnProperty(source_model))
+  {
+    attributes_schema[source_model]["schema"][association.as] = '['+ association.target +']';
+  }else{
+    attributes_schema[source_model] = {
+        "schema" : { [association.as] : '['+ association.target +']'},
+        "mutations" : {}
+    };
+  }
+}
+
 //associations hasMany and hasOne modify both source and target models
 fillAttributesHasManyOne = function(source_model,association,attributes_schema)
 {
@@ -171,7 +185,10 @@ module.exports.getAllAttributesForSchema = function(opts, attributes_schema)
       fillAttributesBelongsTo(source_model,association,attributes_schema);
     }else if(association.type === 'hasOne'|| association.type === 'hasMany'){
       fillAttributesHasManyOne(source_model,association,attributes_schema);
+    }else if(association.type === 'belongsToMany'){
+      fillAttributesBelongsToMany(source_model,association,attributes_schema);
     }
+
   });
 }
 
@@ -183,7 +200,7 @@ module.exports.addAssociations = function(associations, summary_associations, so
       associations.forEach((association) => {
         if(association.type === 'belongsTo')
         {
-          summary_associations.push(
+          summary_associations['one-many'].push(
             {
               "source_table" : source_table,
               "target_table" : association.target_table,
@@ -191,13 +208,39 @@ module.exports.addAssociations = function(associations, summary_associations, so
             }
           );
         }else if(association.type === 'hasMany' || association.type === 'hasOne' ){
-          summary_associations.push(
+          summary_associations['one-many'].push(
             {
               "source_table" : association.target_table,
               "target_table" : source_table,
               "foreign_key" : Object.keys(association.foreign_key)[0]
             }
           );
+        }else if(association.type === 'belongsToMany'){
+          let through = association.cross_table;
+          //if the cross table hasn't been registered then add it to the summary
+          if(!summary_associations['many-many'].hasOwnProperty(through))
+          {
+            let attributes = {};
+            let references = {};
+
+            for( key in association.source_key)
+            {
+              attributes[key] = association.source_key[key];
+              references[key] = source_table;
+            }
+
+            for( key in association.target_key)
+            {
+              attributes[key] = association.target_key[key];
+              references[key] = association.target_table;
+            }
+
+            summary_associations['many-many'][through] = {
+              "attributes" : attributes,
+              "references" : references
+            };
+          }
+
         }
       });
     }
@@ -223,7 +266,8 @@ module.exports.getOpts = function(jsonFile){
 */
 module.exports.generateAssociationsMigrations =  function( summary_associations, dir_write)
 {
-  summary_associations.forEach( async (assoc_migration) =>{
+  //migrations with add column
+  summary_associations['one-many'].forEach( async (assoc_migration) =>{
     let generatedMigration = await generateJs('create-association-migration',assoc_migration);
     let name_migration = module.exports.createNameMigration(dir_write, 'z-column-'+assoc_migration.foreign_key+'-to-'+assoc_migration.source_table);
     fs.writeFile( name_migration, generatedMigration, function(err){
@@ -233,6 +277,20 @@ module.exports.generateAssociationsMigrations =  function( summary_associations,
       }
     });
   });
+
+  //migrations with create table (belongsToMany - through)
+  Object.entries(summary_associations['many-many']).forEach( async ([name_assoc, value])=> {
+    value['cross_table'] = name_assoc;
+    let generatedMigration = await generateJs('create-through-migration', value);
+    let name_migration = module.exports.createNameMigration(dir_write, 'z-through-'+name_assoc);
+    fs.writeFile( name_migration, generatedMigration, function(err){
+      if (err)
+      {
+        return console.log(err);
+      }
+    });
+  });
+
 }
 
 module.exports.generateSection = async function(section, opts, dir_write )

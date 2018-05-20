@@ -12,9 +12,10 @@ module.exports = function(sequelize, DataTypes){
   });
 
   <%- name -%>.associate = function(models){
-      <% for(let i=0; i < associations.length; i++){ %>
-        <%- name -%>.<%= associations[i].type %>(models.<%= associations[i].target.toLowerCase() %>);
-      <% } %>
+      <% for(let i=0; i < associations.length; i++){ -%>
+        <%- name -%>.<%= associations[i].type %>(models.<%= associations[i].target.toLowerCase() -%>
+        <% if(associations[i].type === 'belongsToMany'){ -%> ,{through : '<%= associations[i].cross_table -%>'}  <%} -%>);
+      <% } -%>
   };
 
   return <%- name -%>;

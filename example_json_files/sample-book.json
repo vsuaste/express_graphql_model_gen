@@ -1,0 +1,23 @@
+{
+  "model" : "Book",
+  "table" : "books",
+  "attributes" : {
+    "title" : "String",
+    "genre" : "String"
+  },
+  "associations" : [
+    {
+      "type" : "belongsToMany",
+      "target" : "Person",
+      "target_table" : "people",
+      "as" : "people",
+      "cross_table" : "books_to_people",
+      "source_key" : {
+            "bookId" : "Int"
+        },
+      "target_key" : {
+          "personId" : "Int"
+      }
+    }
+  ]
+}

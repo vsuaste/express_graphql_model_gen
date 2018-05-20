@@ -10,7 +10,11 @@ var checkAuthorization = require('../utils/check-authorization');
 module.exports = {
     people: function(_, context) {
         if (checkAuthorization(context, 'people', 'read') == true) {
-            return person.findAll();
+            return person.findAll({
+                include: [{
+                    all: true
+                }]
+            });
         } else {
             return "You don't have authorization to perform this action";
         }
@@ -23,7 +27,10 @@ module.exports = {
             let arg = new searchArg(input);
             let arg_sequelize = arg.toSequelize();
             return person.findAll({
-                where: arg_sequelize
+                where: arg_sequelize,
+                include: [{
+                    all: true
+                }]
             });
         } else {
             return "You don't have authorization to perform this action";
