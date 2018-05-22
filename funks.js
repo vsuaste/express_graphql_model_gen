@@ -111,7 +111,8 @@ fillAttributesBelongsTo = function(source_model,association,attributes_schema)
     //insert model for the first time and set attributes related to associations
     attributes_schema[source_model] = {
         "schema" : { [name_attribute] : association.target},
-        "mutations" :  association.foreign_key
+        "mutations" :  association.foreign_key,
+        "resolvers" : {}
     };
   }
 }
@@ -119,13 +120,20 @@ fillAttributesBelongsTo = function(source_model,association,attributes_schema)
 //association belongsToMany only modify the source model and only the schema (no mutations)
 fillAttributesBelongsToMany = function(source_model,association,attributes_schema)
 {
+  let search_type = association.as+'Search(input : search'+ association.target + 'Input)';
+
   if(attributes_schema.hasOwnProperty(source_model))
   {
     attributes_schema[source_model]["schema"][association.as] = '['+ association.target +']';
+
+    attributes_schema[source_model]["schema"][search_type] = '['+ association.target +']';
   }else{
     attributes_schema[source_model] = {
-        "schema" : { [association.as] : '['+ association.target +']'},
-        "mutations" : {}
+        "schema" : { [association.as] : '['+ association.target +']',
+                      [search_type] : '['+ association.target +']'
+                    },
+        "mutations" : {},
+        "resolvers" : {}
     };
   }
 }
@@ -145,8 +153,15 @@ fillAttributesHasManyOne = function(source_model,association,attributes_schema)
     //insert model for the first time and set attributes
     attributes_schema[source_model] = {
         "schema" : { [name_attribute] : type_attribute },
-        "mutations" : {}
+        "mutations" : {},
+        "resolvers" : {}
     };
+  }
+
+  if(association.type === 'hasMany')
+  {
+    let search_type = association.as+'Search(input : search'+ association.target + 'Input)';
+    attributes_schema[source_model]['schema'][search_type] = type_attribute;
   }
 
   if(attributes_schema.hasOwnProperty(association.target))
@@ -155,7 +170,8 @@ fillAttributesHasManyOne = function(source_model,association,attributes_schema)
   }else{
     attributes_schema[association.target] = {
       "schema" : {},
-      "mutations" : association.foreign_key
+      "mutations" : association.foreign_key,
+      "resolvers" : {}
     }
   }
 
