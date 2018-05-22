@@ -27,8 +27,9 @@ describe('Generated code', function(){
   it('Sequelize model', function(){
     fs.readFile(__dirname + '/created-model.js', 'utf8', (err, data)=> {
       let test_sequelize =  test.sequelize.replace(/\s/g, '');
-      created_sequelize = data.replace(/\s/g, '');
+      let created_sequelize = data.replace(/\s/g, '');
       expect(created_sequelize).to.be.equal(test_sequelize);
     });
   });
+
 });

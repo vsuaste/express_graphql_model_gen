@@ -7,6 +7,31 @@ const searchArg = require('../utils/search-argument');
 const fileTools = require('../utils/file-tools');
 var checkAuthorization = require('../utils/check-authorization');
 
+person.prototype.dogsSearch = function({
+    input
+}, context) {
+    let arg = new searchArg(input);
+    let arg_sequelize = arg.toSequelize();
+    return this.getDogs({
+        where: arg_sequelize,
+        include: [{
+            all: true
+        }]
+    });
+}
+person.prototype.booksSearch = function({
+    input
+}, context) {
+    let arg = new searchArg(input);
+    let arg_sequelize = arg.toSequelize();
+    return this.getBooks({
+        where: arg_sequelize,
+        include: [{
+            all: true
+        }]
+    });
+}
+
 module.exports = {
     people: function(_, context) {
         if (checkAuthorization(context, 'people', 'read') == true) {
@@ -112,13 +137,15 @@ module.exports = {
 }`;
 
 module.exports.graphql = `module.exports =\`
-
 type Person  {
   firstName: String
   lastName: String
   email: String
 
   dogs: [Dog]
+  dogsSearch(input : searchDogInput): [Dog]
+  books: [Book]
+  booksSearch(input : searchBookInput): [Book]
 }
 
 enum PersonField {
@@ -142,9 +169,9 @@ type Query {
 }
 
 type Mutation {
-  addPerson( firstName: String, lastName: String, email: String  ): Person
+  addPerson( firstName: String, lastName: String, email: String ): Person
   deletePerson(id: ID!): String!
-  updatePerson(id: ID!, firstName: String, lastName: String, email: String ): Person!
+  updatePerson(id: ID!, firstName: String, lastName: String, email: String): Person!
   bulkAddPersonXlsx: [Person]
   bulkAddPersonCsv: [Person]
 }
@@ -172,14 +199,12 @@ module.exports = function(sequelize, DataTypes) {
     });
 
     Person.associate = function(models) {
-
-
         Person.hasMany(models.dog);
-
-
+        Person.belongsToMany(models.book, {
+            through: 'books_to_people'
+        });
     };
 
     return Person;
 };
-
 `
