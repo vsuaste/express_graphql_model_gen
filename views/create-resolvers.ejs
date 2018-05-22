@@ -7,6 +7,14 @@ const searchArg = require('../utils/search-argument');
 const fileTools =  require('../utils/file-tools');
 var checkAuthorization = require('../utils/check-authorization');
 
+<%for (var key in non_root_resolvers){-%>
+  <%- nameLc -%>.prototype.<%= key%>Search = function({input}, context){
+    let arg = new searchArg(input);
+    let arg_sequelize = arg.toSequelize();
+    return this.get<%- non_root_resolvers[key]%>({where: arg_sequelize, include: [{all: true}] });
+  }
+<%}-%>
+
 module.exports = {
   <%- namePl -%>: function(_, context){
     if(checkAuthorization(context,'<%- namePl -%>', 'read')==true){

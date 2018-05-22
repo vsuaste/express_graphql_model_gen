@@ -125,15 +125,15 @@ fillAttributesBelongsToMany = function(source_model,association,attributes_schem
   if(attributes_schema.hasOwnProperty(source_model))
   {
     attributes_schema[source_model]["schema"][association.as] = '['+ association.target +']';
-
     attributes_schema[source_model]["schema"][search_type] = '['+ association.target +']';
+    attributes_schema[source_model]['resolvers'][association.as] = inflection.pluralize(association.target);
   }else{
     attributes_schema[source_model] = {
         "schema" : { [association.as] : '['+ association.target +']',
                       [search_type] : '['+ association.target +']'
                     },
         "mutations" : {},
-        "resolvers" : {}
+        "resolvers" : { [association.as] : inflection.pluralize(association.target)}
     };
   }
 }
@@ -162,6 +162,7 @@ fillAttributesHasManyOne = function(source_model,association,attributes_schema)
   {
     let search_type = association.as+'Search(input : search'+ association.target + 'Input)';
     attributes_schema[source_model]['schema'][search_type] = type_attribute;
+    attributes_schema[source_model]['resolvers'][association.as] = inflection.pluralize(association.target);
   }
 
   if(attributes_schema.hasOwnProperty(association.target))
@@ -182,9 +183,11 @@ module.exports.concatenateExtraAttributes = function(opts, model_extra_attribute
   {
     opts["foreign_attributesStr"]="";
     opts["assoc_attributes"]={};
+    opts["non_root_resolvers"]={};
   }else{
     opts["foreign_attributesStr"] = attributesToString(model_extra_attributes.mutations);
     opts["assoc_attributes"] = model_extra_attributes.schema;
+    opts["non_root_resolvers"]= model_extra_attributes.resolvers;
   }
 }
 
