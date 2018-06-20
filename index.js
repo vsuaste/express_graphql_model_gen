@@ -29,16 +29,25 @@ program
         }
       });
 
+      //test
+      fs.readdirSync(json_dir).forEach((json_file) => {
+          console.log("Reading...", json_file);
+          let opts = funks.getOptions(json_dir+'/'+json_file);
+          console.log(opts.name);
+          //console.log(opts.associations);
+      });
+
       //get associations information (first iteration over json files)
+      /*
       fs.readdirSync(json_dir).forEach((json_file) => {
           let opts = funks.getOpts(json_dir+'/'+json_file);
           models.push([opts.name , opts.namePl]);
           funks.getAllAttributesForSchema(opts,attributes_schema);
           console.log(attributes_schema);
       });
-
+      */
       // creates schema, resolvers and model for each json file provided (second iteration over json files)
-
+      /*
       fs.readdirSync(json_dir).forEach( async (json_file) => {
 
           let opts = funks.getOpts(json_dir+'/'+json_file);
@@ -72,7 +81,7 @@ program
       });
 
       funks.generateAssociationsMigrations(summary_associations,dir_write);
-
+      */
   });
 
 program.parse(process.argv);

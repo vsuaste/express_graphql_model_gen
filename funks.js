@@ -6,6 +6,18 @@ const jsb = require('js-beautify').js_beautify;
 const {promisify} = require('util');
 const ejsRenderFile = promisify( ejs.renderFile );
 
+associations_type = {
+  "many" : ['sql_hasMany', 'sql_belongsToMany','cross_hasMany'],
+  "one" : ['sql_hasOne', 'sql_belongsTo', 'cross_hasOne']
+}
+
+/*
+association_storage = {
+  "sql" : ['sql_hasMany', 'sql_hasOne', 'sql_belongsTo', 'sql_belongsToMany'],
+  "cross" : ['cross_hasMany', 'cross_hasOne']
+}
+*/
+
 parseFile = function(jFile){
   let data=fs.readFileSync(jFile, 'utf8');
   let words=JSON.parse(data);
@@ -96,6 +108,86 @@ writeIndexModelsCommons = function(dir_write){
       return console.log(err);
     });
 }
+
+convertToType = function(many, model_name)
+{
+  if(many)
+  {
+    return '[ '+ model_name +' ]';
+  }
+
+  return model_name;
+}
+
+module.exports.getOptions = function(json_file)
+{
+  let dataModel = parseFile(json_file);
+  console.log(dataModel.associations);
+  let opts = {
+    name : dataModel.model,
+    storageType : dataModel.storageType.toLowerCase(),
+    table : inflection.pluralize(dataModel.model.toLowerCase()),
+    nameLc: dataModel.model.toLowerCase(),
+    namePl: inflection.pluralize(dataModel.model.toLowerCase()),
+    attributes: dataModel.attributes,
+    attributesStr: attributesToString(dataModel.attributes),
+    associations: parseAssociations(dataModel.associations, dataModel.storageType.toLowerCase()),
+  }
+  return opts;
+}
+
+parseAssociations = function(associations, storageType)
+{
+  associations_info = {
+    "schema_attributes" : {},
+    "mutations_attributes" : {},
+    "explicit_resolvers" : {},
+    "implicit_associations" : {
+      "hasMany" : [],
+      "hasOne" : [],
+      "belongsTo" : [],
+      "belongsToMany" : []
+    }
+  }
+
+  Object.entries(associations).forEach(([name, association]) => {
+      association.targetStorageType = association.targetStorageType.toLowerCase();
+      let target_schema = association.target;
+      if(associations_type["many"].includes(association.type) )
+      {
+        target_schema = '['+association.target+']';
+      }else if(!(associations_type["one"].includes(association.type)))
+      {
+        console.log("Association type"+ association.type + "not supported.");
+        return;
+      }
+      associations_info.schema_attributes[name] = target_schema;
+
+      //in this case handle the resolver via sequelize
+      if(storageType === 'sql' && association.targetStorageType === 'sql' )
+      {
+        let type = association.type.split("_")[1];
+        let implicit_assoc = {
+          "target" : association.target.toLowerCase(),
+          }
+
+        if(type === "belongsToMany"){
+          implicit_assoc["through"] = association.keysIn;
+        }
+
+        if(type === "belongsTo"){
+          associations_info.mutations_attributes[association.targetKey] = "String";
+        }
+
+        associations_info.implicit_associations[type].push( implicit_assoc );
+      }else{ //handle the association via resolvers
+
+      }
+    });
+    associations_info.mutations_attributes = attributesToString(associations_info.mutations_attributes);
+    console.log(associations_info);
+    console.log(associations_info.implicit_associations);
+  }
 
 //association belongsTo only modify the source model
 fillAttributesBelongsTo = function(source_model,association,attributes_schema)
