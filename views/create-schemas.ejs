@@ -4,8 +4,8 @@ module.exports = `
   {<% for (var key in attributes) { %>
     <%= key %>: <%= attributes[key] -%>
   <% } %>
-  <% for (var key in assoc_attributes) { %>
-    <%= key %>: <%= assoc_attributes[key] -%>
+  <% for (var key in associations.schema_attributes) { %>
+    <%= key %>: <%= associations.schema_attributes[key] -%>
   <% } %>
   }
 
@@ -29,9 +29,9 @@ module.exports = `
   }
 
   type Mutation {
-    add<%- name -%>( <%- attributesStr -%><% if (foreign_attributesStr !==""){-%>, <%= foreign_attributesStr %>  <%}-%> ): <%- name %>
+    add<%- name -%>( <%- attributesStr -%><% if (associations.mutations_attributes !==""){-%>, <%= associations.mutations_attributes %>  <%}-%> ): <%- name %>
     delete<%- name -%>(id: ID!): String!
-    update<%- name -%>(id: ID!, <%- attributesStr -%><% if (foreign_attributesStr !==""){-%>, <%= foreign_attributesStr %>  <%}-%>): <%- name %>!
+    update<%- name -%>(id: ID!, <%- attributesStr -%><% if (associations.mutations_attributes !==""){-%>, <%= associations.mutations_attributes %>  <%}-%>): <%- name %>!
     bulkAdd<%- name -%>Xlsx: [<%- name -%>]
     bulkAdd<%- name -%>Csv: [<%- name -%>]
 }

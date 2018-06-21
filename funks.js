@@ -187,6 +187,7 @@ parseAssociations = function(associations, storageType)
     associations_info.mutations_attributes = attributesToString(associations_info.mutations_attributes);
     console.log(associations_info);
     console.log(associations_info.implicit_associations);
+    return associations_info;
   }
 
 //association belongsTo only modify the source model

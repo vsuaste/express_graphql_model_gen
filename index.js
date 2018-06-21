@@ -16,7 +16,7 @@ program
   .action((json_dir, dir_write) => {
       console.log("Generating files...");
       dir_write = (dir_write===undefined) ? __dirname : dir_write;
-      let sections = ['schemas', 'resolvers', 'models', 'migrations'];
+      let sections = ['schemas2'];//, 'resolvers2', 'models2', 'migrations2'];
       let models = [];
       let attributes_schema = {};
       let summary_associations = {'one-many': [], 'many-many': {}};
@@ -35,6 +35,20 @@ program
           let opts = funks.getOptions(json_dir+'/'+json_file);
           console.log(opts.name);
           //console.log(opts.associations);
+          sections.forEach((section) =>{
+              let file_name = "";
+              if(section==='migrations')
+              {
+                file_name = funks.createNameMigration(dir_write,opts.nameLc);
+              }else{
+                file_name = dir_write + '/'+ section +'/' + opts.nameLc + '.js';
+              }
+
+              funks.generateSection(section, opts, file_name)
+              .then( () => {
+                  console.log(file_name + ' written succesfully!');
+              });
+          });
       });
 
       //get associations information (first iteration over json files)
