@@ -1,34 +1,26 @@
 {
   "model" : "Person",
-  "table" : "people",
+  "storageType" : "SQL",
   "attributes" : {
     "firstName" : "String",
     "lastName" : "String",
     "email" : "String"
   },
-  "associations" : [
-    {
-      "type" : "hasMany",
+  "associations":{
+    "dogs":{
+      "type" : "sql_hasMany",
       "target" : "Dog",
-      "target_table" : "dogs",
-      "as" : "dogs",
-      "foreign_key" : {
-            "personId" : "Int"
-        }
+      "targetKey" : "personId",
+      "targetStorageType" : "sql"
     },
 
-    {
-      "type" : "belongsToMany",
+    "books":{
+      "type" : "sql_belongsToMany",
       "target" : "Book",
-      "target_table" : "books",
-      "as" : "books",
-      "cross_table" : "books_to_people",
-      "source_key" : {
-            "personId" : "Int"
-        },
-      "target_key" : {
-          "dogId" : "Int"
-      }
+      "targetKey" : "bookId",
+      "sourceKey" : "personId",
+      "keysIn" : "books_to_people",
+      "targetStorageType" : "sql"
     }
-  ]
+  }
 }

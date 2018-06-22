@@ -1,23 +1,19 @@
 {
   "model" : "Book",
-  "table" : "books",
+  "storageType" : "sql",
   "attributes" : {
     "title" : "String",
     "genre" : "String"
   },
-  "associations" : [
-    {
-      "type" : "belongsToMany",
-      "target" : "Person",
-      "target_table" : "people",
-      "as" : "people",
-      "cross_table" : "books_to_people",
-      "source_key" : {
-            "bookId" : "Int"
-        },
-      "target_key" : {
-          "personId" : "Int"
-      }
-    }
-  ]
+  "associations":{
+
+      "people" : {
+          "type" : "sql_belongsToMany",
+          "target" : "Person",
+          "targetKey" : "personId",
+          "sourceKey" : "bookId",
+          "keysIn" : "books_to_people",
+          "targetStorageType" : "sql"
+        }
+  }
 }
