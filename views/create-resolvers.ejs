@@ -8,7 +8,7 @@ const fileTools =  require('../utils/file-tools');
 var checkAuthorization = require('../utils/check-authorization');
 
 <%for (let i=0; i < associations.implicit_associations["hasMany"].length; i++){-%>
-  <%- nameLc -%>.prototype.<%=associations.implicit_associations["hasMany"][i].resolver%> = function({input}, context){
+  <%- nameLc -%>.prototype.<%=associations.implicit_associations["hasMany"][i].resolver%>Filter = function({input}, context){
     if(input === undefined)
     {
       return this.get<%- associations.implicit_associations["hasMany"][i].get_name%>({ include: [{all: true}] });
@@ -22,7 +22,7 @@ var checkAuthorization = require('../utils/check-authorization');
 
 
 <%for (let i=0; i < associations.implicit_associations["belongsToMany"].length; i++){-%>
-  <%- nameLc -%>.prototype.<%=associations.implicit_associations["belongsToMany"][i].resolver %> = function({input}, context){
+  <%- nameLc -%>.prototype.<%=associations.implicit_associations["belongsToMany"][i].resolver%>Filter = function({input}, context){
     if(input === undefined)
     {
       return this.get<%- associations.implicit_associations["belongsToMany"][i].get_name%>({ include: [{all: true}] });

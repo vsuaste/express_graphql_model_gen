@@ -9,7 +9,7 @@ module.exports = `
     <%= key %>: <%= associations.schema_attributes.one[key]%>
   <%}-%>
   <%for(var key in associations.schema_attributes.many){-%>
-    <%= key %>(input: search<%= associations.schema_attributes.many[key] -%>Input): [<%= associations.schema_attributes.many[key]%>]
+    <%= key%>Filter(input: search<%= associations.schema_attributes.many[key] -%>Input): [<%= associations.schema_attributes.many[key]%>]
   <%}-%>
 }
 

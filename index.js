@@ -50,16 +50,16 @@ program
                   console.log(file_name + ' written succesfully!');
               });
           });
-
-          let index_resolvers_file = dir_write + '/resolvers/index.js';
-          funks.generateSection('resolvers-index',{models: models} ,index_resolvers_file)
-          .then( () => {
-            console.log('resolvers-index written succesfully!');
-          });
-
-          funks.writeCommons(dir_write);
           funks.generateAssociationsMigrations(opts, dir_write);
       });
+
+      let index_resolvers_file = dir_write + '/resolvers/index.js';
+      funks.generateSection('resolvers-index',{models: models} ,index_resolvers_file)
+      .then( () => {
+        console.log('resolvers-index written succesfully!');
+      });
+
+      funks.writeCommons(dir_write);
 
       //get associations information (first iteration over json files)
       /*
