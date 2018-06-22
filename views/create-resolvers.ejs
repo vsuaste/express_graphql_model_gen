@@ -7,18 +7,44 @@ const searchArg = require('../utils/search-argument');
 const fileTools =  require('../utils/file-tools');
 var checkAuthorization = require('../utils/check-authorization');
 
-<%for (var key in non_root_resolvers){-%>
-  <%- nameLc -%>.prototype.<%= key%>Search = function({input}, context){
-    let arg = new searchArg(input);
-    let arg_sequelize = arg.toSequelize();
-    return this.get<%- non_root_resolvers[key]%>({where: arg_sequelize, include: [{all: true}] });
+<%for (let i=0; i < associations.implicit_associations["hasMany"].length; i++){-%>
+  <%- nameLc -%>.prototype.<%=associations.implicit_associations["hasMany"][i].resolver%> = function({input}, context){
+    if(input === undefined)
+    {
+      return this.get<%- associations.implicit_associations["hasMany"][i].get_name%>({ include: [{all: true}] });
+    }else{
+      let arg = new searchArg(input);
+      let arg_sequelize = arg.toSequelize();
+      return this.get<%- associations.implicit_associations["hasMany"][i].get_name%>({where: arg_sequelize, include: [{all: true}] });
+    }
+  }
+<%}-%>
+
+
+<%for (let i=0; i < associations.implicit_associations["belongsToMany"].length; i++){-%>
+  <%- nameLc -%>.prototype.<%=associations.implicit_associations["belongsToMany"][i].resolver %> = function({input}, context){
+    if(input === undefined)
+    {
+      return this.get<%- associations.implicit_associations["belongsToMany"][i].get_name%>({ include: [{all: true}] });
+    }else{
+      let arg = new searchArg(input);
+      let arg_sequelize = arg.toSequelize();
+      return this.get<%- associations.implicit_associations["belongsToMany"][i].get_name%>({where: arg_sequelize, include: [{all: true}] });
+    }
   }
 <%}-%>
 
 module.exports = {
-  <%- namePl -%>: function(_, context){
+
+  <%- namePl -%>: function({input}, context){
     if(checkAuthorization(context,'<%- namePl -%>', 'read')==true){
-      return <%- nameLc -%>.findAll({include: [{all: true}]});
+        if(input === undefined){
+          return <%- nameLc -%>.findAll({include: [{all: true}]});
+        }else{
+          let arg = new searchArg(input);
+          let arg_sequelize = arg.toSequelize();
+          return <%- nameLc -%>.findAll({where: arg_sequelize,include: [{all: true}]});
+        }
     }else{
         return "You don't have authorization to perform this action";
       }

@@ -3,7 +3,7 @@
 module.exports = {
 
   up: function(queryInterface, Sequelize){
-    return queryInterface.createTable('<%-cross_table-%>', {
+    return queryInterface.createTable('<%-through-%>', {
 
       createdAt: {
         type: Sequelize.DATE
@@ -12,22 +12,27 @@ module.exports = {
       updatedAt: {
         type: Sequelize.DATE
       },
-      <% for (var key in attributes) { %>
-        <% let type_seq =  attributes[key] -%>
-        <% if(type_seq === 'Int'){ type_seq = 'INTEGER' } -%>
-        <%= key %>: {
-            type: Sequelize.<%= type_seq.toUpperCase() %>,
-            references: {
-              model: '<%= references[key] %>',
-              key : 'id'
-            }
-        },
-      <% } %>
+
+      <%- sourceKey-%>:{
+        type: Sequelize.INTEGER,
+        references:{
+          model: '<%-source-%>',
+          key: 'id'
+        }
+      },
+
+      <%- targetKey-%>:{
+        type: Sequelize.INTEGER,
+        references:{
+          model: '<%-resolver-%>',
+          key: 'id'
+        }
+      }
     });
   },
 
   down: function(queryInterface, Sequelize){
-    return queryInterface.dropTable('<%-cross_table-%>');
+    return queryInterface.dropTable('<%-through-%>');
   }
 
 };

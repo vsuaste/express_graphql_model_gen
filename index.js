@@ -16,7 +16,7 @@ program
   .action((json_dir, dir_write) => {
       console.log("Generating files...");
       dir_write = (dir_write===undefined) ? __dirname : dir_write;
-      let sections = ['schemas2'];//, 'resolvers2', 'models2', 'migrations2'];
+      let sections = ['schemas', 'resolvers', 'models', 'migrations'];
       let models = [];
       let attributes_schema = {};
       let summary_associations = {'one-many': [], 'many-many': {}};
@@ -33,6 +33,7 @@ program
       fs.readdirSync(json_dir).forEach((json_file) => {
           console.log("Reading...", json_file);
           let opts = funks.getOptions(json_dir+'/'+json_file);
+          models.push([opts.name , opts.namePl]);
           console.log(opts.name);
           //console.log(opts.associations);
           sections.forEach((section) =>{
@@ -49,6 +50,15 @@ program
                   console.log(file_name + ' written succesfully!');
               });
           });
+
+          let index_resolvers_file = dir_write + '/resolvers/index.js';
+          funks.generateSection('resolvers-index',{models: models} ,index_resolvers_file)
+          .then( () => {
+            console.log('resolvers-index written succesfully!');
+          });
+
+          funks.writeCommons(dir_write);
+          funks.generateAssociationsMigrations(opts, dir_write);
       });
 
       //get associations information (first iteration over json files)

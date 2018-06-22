@@ -139,7 +139,10 @@ module.exports.getOptions = function(json_file)
 parseAssociations = function(associations, storageType)
 {
   associations_info = {
-    "schema_attributes" : {},
+    "schema_attributes" : {
+      "many" : {},
+      "one" : {}
+    },
     "mutations_attributes" : {},
     "explicit_resolvers" : {},
     "implicit_associations" : {
@@ -152,16 +155,18 @@ parseAssociations = function(associations, storageType)
 
   Object.entries(associations).forEach(([name, association]) => {
       association.targetStorageType = association.targetStorageType.toLowerCase();
-      let target_schema = association.target;
+      //let target_schema = association.target;
       if(associations_type["many"].includes(association.type) )
       {
-        target_schema = '['+association.target+']';
-      }else if(!(associations_type["one"].includes(association.type)))
+        associations_info.schema_attributes["many"][name] = association.target;
+      }else if(associations_type["one"].includes(association.type))
       {
+        associations_info.schema_attributes["one"][name] = association.target;
+      }else{
         console.log("Association type"+ association.type + "not supported.");
         return;
       }
-      associations_info.schema_attributes[name] = target_schema;
+
 
       //in this case handle the resolver via sequelize
       if(storageType === 'sql' && association.targetStorageType === 'sql' )
@@ -169,14 +174,19 @@ parseAssociations = function(associations, storageType)
         let type = association.type.split("_")[1];
         let implicit_assoc = {
           "target" : association.target.toLowerCase(),
+          "resolver" : inflection.pluralize(association.target.toLowerCase()),
+          "get_name" : inflection.pluralize(association.target)
           }
 
         if(type === "belongsToMany"){
           implicit_assoc["through"] = association.keysIn;
+          implicit_assoc["targetKey"] = association.targetKey;
+          implicit_assoc["sourceKey"] = association.sourceKey;
         }
 
         if(type === "belongsTo"){
-          associations_info.mutations_attributes[association.targetKey] = "String";
+          implicit_assoc["key"] = association.targetKey;
+          associations_info.mutations_attributes[association.targetKey] = "Int";
         }
 
         associations_info.implicit_associations[type].push( implicit_assoc );
@@ -373,9 +383,40 @@ module.exports.getOpts = function(jsonFile){
   return opts;
 }
 
+
+module.exports.generateAssociationsMigrations =  function( opts, dir_write){
+
+    opts.associations.implicit_associations.belongsTo.forEach( async (assoc) =>{
+      assoc["source"] = opts.table;
+      let generatedMigration = await generateJs('create-association-migration',assoc);
+      let name_migration = module.exports.createNameMigration(dir_write, 'z-column-'+assoc.key+'-to-'+opts.table);
+      fs.writeFile( name_migration, generatedMigration, function(err){
+        if (err)
+        {
+          return console.log(err);
+        }else{
+          console.log(name_migration+" writen succesfully!");
+        }
+      });
+    });
+
+    opts.associations.implicit_associations.belongsToMany.forEach( async (assoc) =>{
+      assoc["source"] = opts.table;
+      let generatedMigration = await generateJs('create-through-migration',assoc);
+      let name_migration = module.exports.createNameMigration(dir_write, 'z-through-'+assoc.through);
+      fs.writeFile( name_migration, generatedMigration, function(err){
+        if (err)
+        {
+          return console.log(err);
+        }else{
+          console.log(name_migration+" writen succesfully!");
+        }
+      });
+    });
+}
+
+
 /*
-  TODO: support for belongsToMany association
-*/
 module.exports.generateAssociationsMigrations =  function( summary_associations, dir_write)
 {
   //migrations with add column
@@ -402,8 +443,8 @@ module.exports.generateAssociationsMigrations =  function( summary_associations,
       }
     });
   });
-
 }
+*/
 
 module.exports.generateSection = async function(section, opts, dir_write )
 {

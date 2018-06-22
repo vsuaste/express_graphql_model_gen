@@ -1,13 +1,17 @@
 
 module.exports = `
   type <%- name -%>
-  {<% for (var key in attributes) { %>
-    <%= key %>: <%= attributes[key] -%>
-  <% } %>
-  <% for (var key in associations.schema_attributes) { %>
-    <%= key %>: <%= associations.schema_attributes[key] -%>
-  <% } %>
-  }
+  {
+  <% for (var key in attributes){-%>
+    <%= key %>: <%= attributes[key]%>
+  <%}-%>
+  <%for(var key in associations.schema_attributes.one){-%>
+    <%= key %>: <%= associations.schema_attributes.one[key]%>
+  <%}-%>
+  <%for(var key in associations.schema_attributes.many){-%>
+    <%= key %>(input: search<%= associations.schema_attributes.many[key] -%>Input): [<%= associations.schema_attributes.many[key]%>]
+  <%}-%>
+}
 
   enum <%- name -%>Field {
     id <%for (var key in attributes) {%>
