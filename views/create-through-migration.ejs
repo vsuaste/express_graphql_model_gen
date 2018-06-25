@@ -3,7 +3,7 @@
 module.exports = {
 
   up: function(queryInterface, Sequelize){
-    return queryInterface.createTable('<%-through-%>', {
+    return queryInterface.createTable('<%-keysIn-%>', {
 
       createdAt: {
         type: Sequelize.DATE
@@ -24,7 +24,7 @@ module.exports = {
       <%- targetKey-%>:{
         type: Sequelize.INTEGER,
         references:{
-          model: '<%-resolver-%>',
+          model: '<%-target_pl.toLowerCase()-%>',
           key: 'id'
         }
       }
@@ -32,7 +32,7 @@ module.exports = {
   },
 
   down: function(queryInterface, Sequelize){
-    return queryInterface.dropTable('<%-through-%>');
+    return queryInterface.dropTable('<%-keysIn-%>');
   }
 
 };

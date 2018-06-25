@@ -7,29 +7,16 @@ const searchArg = require('../utils/search-argument');
 const fileTools =  require('../utils/file-tools');
 var checkAuthorization = require('../utils/check-authorization');
 
-<%for (let i=0; i < associations.implicit_associations["hasMany"].length; i++){-%>
-  <%- nameLc -%>.prototype.<%=associations.implicit_associations["hasMany"][i].resolver%>Filter = function({input}, context){
+<% let associations_temp = associations.implicit_associations["hasMany"].concat(associations.implicit_associations["belongsToMany"])-%>
+<% for(let i=0; i < associations_temp.length; i++){ -%>
+  <%- nameLc -%>.prototype.<%=associations_temp[i].target_pl.toLowerCase()%>Filter = function({input}, context){
     if(input === undefined)
     {
-      return this.get<%- associations.implicit_associations["hasMany"][i].get_name%>({ include: [{all: true}] });
+      return this.get<%- associations_temp[i].target_pl%>({ include: [{all: true}] });
     }else{
       let arg = new searchArg(input);
       let arg_sequelize = arg.toSequelize();
-      return this.get<%- associations.implicit_associations["hasMany"][i].get_name%>({where: arg_sequelize, include: [{all: true}] });
-    }
-  }
-<%}-%>
-
-
-<%for (let i=0; i < associations.implicit_associations["belongsToMany"].length; i++){-%>
-  <%- nameLc -%>.prototype.<%=associations.implicit_associations["belongsToMany"][i].resolver%>Filter = function({input}, context){
-    if(input === undefined)
-    {
-      return this.get<%- associations.implicit_associations["belongsToMany"][i].get_name%>({ include: [{all: true}] });
-    }else{
-      let arg = new searchArg(input);
-      let arg_sequelize = arg.toSequelize();
-      return this.get<%- associations.implicit_associations["belongsToMany"][i].get_name%>({where: arg_sequelize, include: [{all: true}] });
+      return this.get<%- associations_temp[i].target_pl%>({where: arg_sequelize, include: [{all: true}] });
     }
   }
 <%}-%>

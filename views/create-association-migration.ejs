@@ -3,10 +3,10 @@
 module.exports = {
 
     up: function(queryInterface, Sequelize) {
-        return queryInterface.addColumn('<%= source %>', '<%= key %>',{
+        return queryInterface.addColumn('<%= source %>', '<%= targetKey %>',{
                type: Sequelize.INTEGER,
                references: {
-                 model: '<%=get_name.toLowerCase() %>',
+                 model: '<%=target_pl.toLowerCase() %>',
                  key: 'id'
                }
 
@@ -14,7 +14,7 @@ module.exports = {
     },
 
     down: function(queryInterface, Sequelize) {
-      return queryInterface.removeColumn('<%= source %>', '<%= key %>');
+      return queryInterface.removeColumn('<%= source %>', '<%= targetKey %>');
     }
 
 };

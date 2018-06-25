@@ -8,7 +8,7 @@ const ejsRenderFile = promisify( ejs.renderFile );
 
 associations_type = {
   "many" : ['sql_hasMany', 'sql_belongsToMany','cross_hasMany'],
-  "one" : ['sql_hasOne', 'sql_belongsTo', 'cross_hasOne']
+  "one" : ['sql_hasOne', 'sql_belongsTo', 'cross_hasOne','cross_belongsTo']
 }
 
 /*
@@ -144,11 +144,15 @@ parseAssociations = function(associations, storageType)
       "one" : {}
     },
     "mutations_attributes" : {},
-    "explicit_resolvers" : {},
-    "implicit_associations" : {
-      "hasMany" : [],
-      "hasOne" : [],
+    "explicit_resolvers" : {
       "belongsTo" : [],
+      "hasOne" : [],
+      "hasMany" : []
+    },
+    "implicit_associations" : {
+      "belongsTo" : [],
+      "hasOne" : [],
+      "hasMany" : [],
       "belongsToMany" : []
     }
   }
@@ -156,6 +160,11 @@ parseAssociations = function(associations, storageType)
   Object.entries(associations).forEach(([name, association]) => {
       association.targetStorageType = association.targetStorageType.toLowerCase();
       //let target_schema = association.target;
+      let type = association.type.split("_")[1];
+      if(type === "belongsTo"){ //adds column and attribute to source model
+        associations_info.mutations_attributes[association.targetKey] = "Int";
+      }
+
       if(associations_type["many"].includes(association.type) )
       {
         associations_info.schema_attributes["many"][name] = association.target;
@@ -167,31 +176,15 @@ parseAssociations = function(associations, storageType)
         return;
       }
 
+      let assoc = association;
+      assoc["target_pl"] = inflection.pluralize(association.target);
 
       //in this case handle the resolver via sequelize
       if(storageType === 'sql' && association.targetStorageType === 'sql' )
       {
-        let type = association.type.split("_")[1];
-        let implicit_assoc = {
-          "target" : association.target.toLowerCase(),
-          "resolver" : inflection.pluralize(association.target.toLowerCase()),
-          "get_name" : inflection.pluralize(association.target)
-          }
-
-        if(type === "belongsToMany"){
-          implicit_assoc["through"] = association.keysIn;
-          implicit_assoc["targetKey"] = association.targetKey;
-          implicit_assoc["sourceKey"] = association.sourceKey;
-        }
-
-        if(type === "belongsTo"){
-          implicit_assoc["key"] = association.targetKey;
-          associations_info.mutations_attributes[association.targetKey] = "Int";
-        }
-
-        associations_info.implicit_associations[type].push( implicit_assoc );
+        associations_info.implicit_associations[type].push( assoc );
       }else{ //handle the association via resolvers
-
+        associations_info.explicit_resolvers[type].push( assoc );
       }
     });
     associations_info.mutations_attributes = attributesToString(associations_info.mutations_attributes);
