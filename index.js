@@ -36,21 +36,43 @@ program
           models.push([opts.name , opts.namePl]);
           console.log(opts.name);
           //console.log(opts.associations);
-          sections.forEach((section) =>{
-              let file_name = "";
-              if(section==='migrations')
-              {
-                file_name = funks.createNameMigration(dir_write,opts.nameLc);
-              }else{
-                file_name = dir_write + '/'+ section +'/' + opts.nameLc + '.js';
-              }
+          let file_name = "";
+          if(opts.storageType === 'sql'){
+            sections.forEach((section) =>{
 
-              funks.generateSection(section, opts, file_name)
-              .then( () => {
-                  console.log(file_name + ' written succesfully!');
+                if(section==='migrations')
+                {
+                  file_name = funks.createNameMigration(dir_write,opts.nameLc);
+                }else{
+                  file_name = dir_write + '/'+ section +'/' + opts.nameLc + '.js';
+                }
+
+                funks.generateSection(section, opts, file_name)
+                .then( () => {
+                    console.log(file_name + ' written succesfully!');
+                });
+            });
+            funks.generateAssociationsMigrations(opts, dir_write);
+          }else if(opts.storageType === 'webservice'){
+
+              file_name = dir_write + '/schemas/' + opts.nameLc + '.js';
+              funks.generateSection("schemas",opts,file_name).then( ()=>{
+                console.log(file_name + ' written succesfully!(from webservice)');
               });
-          });
-          funks.generateAssociationsMigrations(opts, dir_write);
+
+              /*
+              file_name = dir_write + '/models-webservice/' + opts.nameLc + '.js';
+              funks.generateSetcion("models-webservice",opts,file_name).then( ()=>{
+                console.log(file_name + ' written succesfully!(from webservice)');
+              });
+
+              file_name = dir_write + '/resolvers/' + opts.nameLc + '.js';
+              funks.generateSetcion("resolvers-webservice",opts,file_name).then( ()=>{
+                console.log(file_name + ' written succesfully!(from webservice)');
+              });
+              */
+          }
+
       });
 
       let index_resolvers_file = dir_write + '/resolvers/index.js';
