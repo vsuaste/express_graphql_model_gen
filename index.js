@@ -29,6 +29,11 @@ program
         }
       });
 
+      if(!fs.existsSync(dir_write+'/models-webservice'))
+      {
+        fs.mkdirSync(dir_write+'/models-webservice');
+      }
+
       //test
       fs.readdirSync(json_dir).forEach((json_file) => {
           console.log("Reading...", json_file);
@@ -36,10 +41,10 @@ program
           models.push([opts.name , opts.namePl]);
           console.log(opts.name);
           //console.log(opts.associations);
-          let file_name = "";
+
           if(opts.storageType === 'sql'){
             sections.forEach((section) =>{
-
+                let file_name = "";
                 if(section==='migrations')
                 {
                   file_name = funks.createNameMigration(dir_write,opts.nameLc);
@@ -54,18 +59,19 @@ program
             });
             funks.generateAssociationsMigrations(opts, dir_write);
           }else if(opts.storageType === 'webservice'){
-
+              let file_name = "";
               file_name = dir_write + '/schemas/' + opts.nameLc + '.js';
               funks.generateSection("schemas",opts,file_name).then( ()=>{
                 console.log(file_name + ' written succesfully!(from webservice)');
               });
 
-              /*
+
               file_name = dir_write + '/models-webservice/' + opts.nameLc + '.js';
-              funks.generateSetcion("models-webservice",opts,file_name).then( ()=>{
+              funks.generateSection("models-webservice",opts,file_name).then( ()=>{
                 console.log(file_name + ' written succesfully!(from webservice)');
               });
 
+              /*
               file_name = dir_write + '/resolvers/' + opts.nameLc + '.js';
               funks.generateSetcion("resolvers-webservice",opts,file_name).then( ()=>{
                 console.log(file_name + ' written succesfully!(from webservice)');
