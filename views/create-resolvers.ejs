@@ -6,6 +6,11 @@ const <%-  nameLc  -%> = require('../models/index').<%- nameLc -%>;
 const searchArg = require('../utils/search-argument');
 const fileTools =  require('../utils/file-tools');
 var checkAuthorization = require('../utils/check-authorization');
+<%for(let type in associations.explicit_resolvers){-%>
+  <%for(let i=0; i < associations.explicit_resolvers[type].length; i++){-%>
+    const <%=associations.explicit_resolvers[type][i].target.toLowerCase()-%> = require('./<%=associations.explicit_resolvers[type][i].target.toLowerCase()-%>');
+  <%}-%>
+<%}-%>
 
 <% let associations_temp = associations.implicit_associations["hasMany"].concat(associations.implicit_associations["belongsToMany"])-%>
 <% for(let i=0; i < associations_temp.length; i++){ -%>
@@ -22,17 +27,32 @@ var checkAuthorization = require('../utils/check-authorization');
 <%}-%>
 <% associations_temp = associations.explicit_resolvers["belongsTo"]-%>
 <% for(let i=0; i < associations_temp.length; i++){ -%>
-  <%- nameLc -%>.prototype.<%=associations_temp[i].target.toLowerCase()%> = function({input}, context){
+  <%- nameLc -%>.prototype.<%=associations_temp[i].target.toLowerCase()%> = function(_, context){
     return <%=associations_temp[i].target.toLowerCase()%>.readOne<%=associations_temp[i].target%>({"id" : this.<%=associations_temp[i].targetKey%>});
   }
 <%}-%>
 
 <% associations_temp = associations.explicit_resolvers["hasOne"]-%>
 <% for(let i=0; i < associations_temp.length; i++){ -%>
-  <%- nameLc -%>.prototype.<%=associations_temp[i].target.toLowerCase()%> = function({input}, context){
+  <%- nameLc -%>.prototype.<%=associations_temp[i].target.toLowerCase()%> = function(_, context){
     return <%=associations_temp[i].target.toLowerCase()%>.<%=associations_temp[i].target_pl%>({"field" : <%=associations_temp[i].targetKey%>, "value":{"value":this.id }}, "operator": "equal");
   }
 <%}-%>
+
+<% associations_temp = associations.explicit_resolvers["hasMany"]-%>
+<% for(let i=0; i < associations_temp.length; i++){ -%>
+  <%- nameLc -%>.prototype.<%=associations_temp[i].target_pl.toLowerCase()%>Filter = function({input}, context){
+    if(input === undefined)
+    {
+      return <%=associations_temp[i].target.toLowerCase()%>.<%=associations_temp[i].target_pl%>({"field" : <%=associations_temp[i].targetKey%>, "value":{"value":this.id }}, "operator": "equal");
+    }else{
+      let filtered = <%=associations_temp[i].target.toLowerCase()%>.<%=associations_temp[i].target_pl%>(input);
+      return filtered.filter( res => {if(res.<%=associations_temp[i].targetKey%> == this.id){return true;} } );
+    }
+
+  }
+<%}-%>
+
 
 module.exports = {
 

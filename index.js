@@ -71,12 +71,12 @@ program
                 console.log(file_name + ' written succesfully!(from webservice)');
               });
 
-              /*
+
               file_name = dir_write + '/resolvers/' + opts.nameLc + '.js';
-              funks.generateSetcion("resolvers-webservice",opts,file_name).then( ()=>{
+              funks.generateSection("resolvers-webservice",opts,file_name).then( ()=>{
                 console.log(file_name + ' written succesfully!(from webservice)');
               });
-              */
+
           }
 
       });
