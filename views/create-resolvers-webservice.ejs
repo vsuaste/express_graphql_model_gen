@@ -1,4 +1,36 @@
 const <%-nameLc-%> =  require('../models_explicit/<%-nameLc-%>');
+const searchArg = require('../utils/search-argument');
+const resolvers = require('./index');
+
+<% associations_temp = associations.explicit_resolvers["belongsTo"]-%>
+<% for(let i=0; i < associations_temp.length; i++){ -%>
+  <%- nameLc -%>.prototype.<%=associations_temp[i].target.toLowerCase()%> = function(_, context){
+    return resolvers.readOne<%=associations_temp[i].target%>({"id" : this.<%=associations_temp[i].targetKey%>});
+  }
+<%}-%>
+
+<% associations_temp = associations.explicit_resolvers["hasOne"]-%>
+<% for(let i=0; i < associations_temp.length; i++){ -%>
+  <%- nameLc -%>.prototype.<%=associations_temp[i].target.toLowerCase()%> = function(_, context){
+    return resolvers.<%=associations_temp[i].target_pl%>({"field" : <%=associations_temp[i].targetKey%>, "value":{"value":this.id }}, "operator": "equal");
+  }
+<%}-%>
+
+<% associations_temp = associations.explicit_resolvers["hasMany"]-%>
+<% for(let i=0; i < associations_temp.length; i++){ -%>
+  <%- nameLc -%>.prototype.<%=associations_temp[i].target_pl.toLowerCase()%>Filter = function({input}, context){
+    if(input === undefined)
+    {
+      return resolvers.<%=associations_temp[i].target_pl%>({"field" : <%=associations_temp[i].targetKey%>, "value":{"value":this.id }}, "operator": "equal");
+    }else{
+      let filtered = resolvers.<%=associations_temp[i].target_pl%>(input);
+      return filtered.filter( res => {if(res.<%=associations_temp[i].targetKey%> == this.id){return true;} } );
+    }
+
+  }
+<%}-%>
+
+
 
 module.exports = {
   <%- namePl -%>: function({input}, context){
@@ -10,6 +42,6 @@ module.exports = {
   readOne<%- name -%>: function({id}, context){
     /*
     YOUR CODE GOES HERE
-    */  
+    */
   }
 }
