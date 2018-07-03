@@ -1,16 +1,15 @@
+let resolvers = {};
+
+module.exports = resolvers;
+
+
 <% for (let i=0; i < models.length; i++ ){ -%>
   var resolvers<%= models[i][0] -%> = require('./<%= models[i][0].toLowerCase()-%>');
 <%}-%>
 
-module.exports = {
-  <% for (let i=0; i < models.length; i++ ){ -%>
-    <%= models[i][1] -%>: resolvers<%= models[i][0]%>.<%= models[i][1] -%>,
-    search<%= models[i][0] -%>: resolvers<%= models[i][0]%>.search<%= models[i][0] -%>,
-    readOne<%= models[i][0] -%>: resolvers<%= models[i][0]%>.readOne<%= models[i][0] -%>,
-    add<%= models[i][0] -%>: resolvers<%= models[i][0]%>.add<%= models[i][0] -%>,
-    delete<%= models[i][0] -%>: resolvers<%= models[i][0]%>.delete<%= models[i][0] -%>,
-    update<%= models[i][0] -%>: resolvers<%= models[i][0]%>.update<%= models[i][0] %>,
-    bulkAdd<%= models[i][0] -%>Csv: resolvers<%= models[i][0]%>.bulkAdd<%= models[i][0] -%>Csv ,
-    bulkAdd<%= models[i][0] -%>Xlsx: resolvers<%= models[i][0]%>.bulkAdd<%= models[i][0] -%>Xlsx,
-  <%}-%>
-};
+<% for (let i=0; i < models.length; i++ ){ -%>
+  for( resolver in resolvers<%= models[i][0]-%> )
+  {
+    resolvers[resolver] = resolvers<%= models[i][0] -%>[resolver];
+  }
+<%}-%>
