@@ -382,7 +382,7 @@ module.exports.generateAssociationsMigrations =  function( opts, dir_write){
     opts.associations.implicit_associations.belongsTo.forEach( async (assoc) =>{
       assoc["source"] = opts.table;
       let generatedMigration = await generateJs('create-association-migration',assoc);
-      let name_migration = module.exports.createNameMigration(dir_write, 'z-column-'+assoc.key+'-to-'+opts.table);
+      let name_migration = module.exports.createNameMigration(dir_write, 'z-column-'+assoc.targetKey+'-to-'+opts.table);
       fs.writeFile( name_migration, generatedMigration, function(err){
         if (err)
         {
@@ -396,7 +396,7 @@ module.exports.generateAssociationsMigrations =  function( opts, dir_write){
     opts.associations.implicit_associations.belongsToMany.forEach( async (assoc) =>{
       assoc["source"] = opts.table;
       let generatedMigration = await generateJs('create-through-migration',assoc);
-      let name_migration = module.exports.createNameMigration(dir_write, 'z-through-'+assoc.through);
+      let name_migration = module.exports.createNameMigration(dir_write, 'z-through-'+assoc.keysIn);
       fs.writeFile( name_migration, generatedMigration, function(err){
         if (err)
         {
