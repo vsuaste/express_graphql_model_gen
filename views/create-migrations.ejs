@@ -26,6 +26,13 @@ module.exports = {
             type: Sequelize.<%= type_seq.toUpperCase() %>
         },
       <% } %>
+
+      <% for(let i=0; i < associations.explicit_resolvers.belongsTo.length; i++){-%>
+        <%=associations.explicit_resolvers.belongsTo[i].targetKey%>: {
+          type: Sequelize.INTEGER
+        },
+      <%}-%>
+
     });
   },
 
