@@ -157,39 +157,41 @@ parseAssociations = function(associations, storageType)
     }
   }
 
-  Object.entries(associations).forEach(([name, association]) => {
-      association.targetStorageType = association.targetStorageType.toLowerCase();
-      //let target_schema = association.target;
-      let type = association.type.split("_")[1];
-      if(type === "belongsTo"){ //adds column and attribute to source model
-        associations_info.mutations_attributes[association.targetKey] = "Int";
-      }
+  if(associations!==undefined){
+    Object.entries(associations).forEach(([name, association]) => {
+        association.targetStorageType = association.targetStorageType.toLowerCase();
+        //let target_schema = association.target;
+        let type = association.type.split("_")[1];
+        if(type === "belongsTo"){ //adds column and attribute to source model
+          associations_info.mutations_attributes[association.targetKey] = "Int";
+        }
 
-      if(associations_type["many"].includes(association.type) )
-      {
-        associations_info.schema_attributes["many"][name] = association.target;
-      }else if(associations_type["one"].includes(association.type))
-      {
-        associations_info.schema_attributes["one"][name] = association.target;
-      }else{
-        console.log("Association type"+ association.type + "not supported.");
-        return;
-      }
+        if(associations_type["many"].includes(association.type) )
+        {
+          associations_info.schema_attributes["many"][name] = association.target;
+        }else if(associations_type["one"].includes(association.type))
+        {
+          associations_info.schema_attributes["one"][name] = association.target;
+        }else{
+          console.log("Association type"+ association.type + "not supported.");
+          return;
+        }
 
-      let assoc = association;
-      assoc["target_pl"] = inflection.pluralize(association.target);
+        let assoc = association;
+        assoc["target_pl"] = inflection.pluralize(association.target);
 
-      //in this case handle the resolver via sequelize
-      if(storageType === 'sql' && association.targetStorageType === 'sql' )
-      {
-        associations_info.implicit_associations[type].push( assoc );
-      }else{ //handle the association via resolvers
-        associations_info.explicit_resolvers[type].push( assoc );
-      }
-    });
-    associations_info.mutations_attributes = attributesToString(associations_info.mutations_attributes);
-    console.log(associations_info);
-    console.log(associations_info.implicit_associations);
+        //in this case handle the resolver via sequelize
+        if(storageType === 'sql' && association.targetStorageType === 'sql' )
+        {
+          associations_info.implicit_associations[type].push( assoc );
+        }else{ //handle the association via resolvers
+          associations_info.explicit_resolvers[type].push( assoc );
+        }
+      });
+      associations_info.mutations_attributes = attributesToString(associations_info.mutations_attributes);
+      console.log(associations_info);
+      console.log(associations_info.implicit_associations);
+    }
     return associations_info;
   }
 
