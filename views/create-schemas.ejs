@@ -28,7 +28,6 @@ module.exports = `
 
   type Query {
     <%- namePl -%>(input: search<%- name -%>Input): [<%- name -%>]
-    search<%- name -%>(input: search<%- name -%>Input): [<%- name -%>]
     readOne<%- name -%>(id: ID!): <%- name %>
   }
 

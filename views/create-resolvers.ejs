@@ -73,17 +73,6 @@ module.exports = {
       }
   },
 
-  search<%- name -%>: function({input}, context){
-    if(checkAuthorization(context, '<%- namePl -%>', 'read')==true)
-    {
-      let arg = new searchArg(input);
-      let arg_sequelize = arg.toSequelize();
-      return <%- nameLc -%>.findAll({where: arg_sequelize,include: [{all: true}]});
-    }else{
-        return "You don't have authorization to perform this action";
-      }
-  },
-
   readOne<%- name -%>: function({id}, context){
     if(checkAuthorization(context, '<%- namePl -%>', 'read')==true)
     {
