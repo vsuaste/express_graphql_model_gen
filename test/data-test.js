@@ -35,4 +35,30 @@ module.exports = \`
   \`;`;
 
 
-module.exports.webservice_graphql_publiser = ``;
+module.exports.webservice_graphql_publiser = `
+module.exports = \`
+  type Publisher  {
+      name: String
+      phone: String
+          booksFilter(input: searchBookInput): [Book]
+  }
+
+  enum PublisherField {
+    id
+    name
+    phone
+  }
+
+  input searchPublisherInput {
+    field: PublisherField
+    value: typeValue
+    operator: Operator
+    searchArg: [searchPublisherInput]
+  }
+
+  type Query {
+    publishers(input: searchPublisherInput): [Publisher]
+    readOnePublisher(id: ID!): Publisher
+  }
+
+  \`;`;
