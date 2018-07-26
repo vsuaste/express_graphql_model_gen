@@ -3,7 +3,6 @@
 const program = require('commander');
 var fs = require('fs');
 const funks = require('./funks');
-console.log("Generating files...");
 
 program
   .version('0.0.1')
@@ -14,126 +13,9 @@ program
   .alias('g')
   .description('Generate code for each model described by each input json file in the \'json-files-folder\'')
   .action((json_dir, dir_write) => {
-      console.log("Generating files...");
-      dir_write = (dir_write===undefined) ? __dirname : dir_write;
-      let sections = ['schemas', 'resolvers', 'models', 'migrations'];
-      let models = [];
-      let attributes_schema = {};
-      let summary_associations = {'one-many': [], 'many-many': {}};
+      //Generate full code : models, schemas, resolvers, migrations
+      funks.generateCode(json_dir, dir_write);
 
-      // creates one folder for each of schemas, resolvers, models
-      sections.forEach( (section) => {
-        if(!fs.existsSync(dir_write+'/'+section))
-        {
-          fs.mkdirSync(dir_write+'/'+section);
-        }
-      });
-
-      if(!fs.existsSync(dir_write+'/models-webservice'))
-      {
-        fs.mkdirSync(dir_write+'/models-webservice');
-      }
-
-      //test
-      fs.readdirSync(json_dir).forEach((json_file) => {
-          console.log("Reading...", json_file);
-          let opts = funks.getOptions(json_dir+'/'+json_file);
-          models.push([opts.name , opts.namePl]);
-          console.log(opts.name);
-          //console.log(opts.associations);
-
-          if(opts.storageType === 'sql'){
-            sections.forEach((section) =>{
-                let file_name = "";
-                if(section==='migrations')
-                {
-                  file_name = funks.createNameMigration(dir_write,opts.nameLc);
-                }else{
-                  file_name = dir_write + '/'+ section +'/' + opts.nameLc + '.js';
-                }
-
-                funks.generateSection(section, opts, file_name)
-                .then( () => {
-                    console.log(file_name + ' written succesfully!');
-                });
-            });
-            funks.generateAssociationsMigrations(opts, dir_write);
-          }else if(opts.storageType === 'webservice'){
-              let file_name = "";
-              file_name = dir_write + '/schemas/' + opts.nameLc + '.js';
-              funks.generateSection("schemas",opts,file_name).then( ()=>{
-                console.log(file_name + ' written succesfully!(from webservice)');
-              });
-
-
-              file_name = dir_write + '/models-webservice/' + opts.nameLc + '.js';
-              funks.generateSection("models-webservice",opts,file_name).then( ()=>{
-                console.log(file_name + ' written succesfully!(from webservice)');
-              });
-
-
-              file_name = dir_write + '/resolvers/' + opts.nameLc + '.js';
-              funks.generateSection("resolvers-webservice",opts,file_name).then( ()=>{
-                console.log(file_name + ' written succesfully!(from webservice)');
-              });
-
-          }
-
-      });
-
-      let index_resolvers_file = dir_write + '/resolvers/index.js';
-      funks.generateSection('resolvers-index',{models: models} ,index_resolvers_file)
-      .then( () => {
-        console.log('resolvers-index written succesfully!');
-      });
-
-      funks.writeCommons(dir_write);
-
-      //get associations information (first iteration over json files)
-      /*
-      fs.readdirSync(json_dir).forEach((json_file) => {
-          let opts = funks.getOpts(json_dir+'/'+json_file);
-          models.push([opts.name , opts.namePl]);
-          funks.getAllAttributesForSchema(opts,attributes_schema);
-          console.log(attributes_schema);
-      });
-      */
-      // creates schema, resolvers and model for each json file provided (second iteration over json files)
-      /*
-      fs.readdirSync(json_dir).forEach( async (json_file) => {
-
-          let opts = funks.getOpts(json_dir+'/'+json_file);
-
-          funks.addAssociations( opts.associations, summary_associations, opts.table);
-          funks.concatenateExtraAttributes(opts,attributes_schema[opts.name]);
-          //console.log(opts);
-          sections.forEach((section) =>{
-              let file_name = "";
-              if(section==='migrations')
-              {
-                file_name = funks.createNameMigration(dir_write,opts.nameLc);
-              }else{
-                file_name = dir_write + '/'+ section +'/' + opts.nameLc + '.js';
-              }
-
-              funks.generateSection(section, opts, file_name)
-              .then( () => {
-                  console.log(file_name + ' written succesfully!');
-              });
-          });
-      });
-
-      funks.writeCommons(dir_write);
-
-      //write resolvers index for all models
-      let index_resolvers_file = dir_write + '/resolvers/index.js';
-      funks.generateSection('resolvers-index',{models: models} ,index_resolvers_file)
-      .then( () => {
-        console.log('resolvers-index written succesfully!');
-      });
-
-      funks.generateAssociationsMigrations(summary_associations,dir_write);
-      */
   });
 
 program.parse(process.argv);

@@ -119,7 +119,7 @@ convertToType = function(many, model_name)
   return model_name;
 }
 
-module.exports.getOptions = function(json_file)
+getOptions = function(json_file)
 {
   let dataModel = parseFile(json_file);
   console.log(dataModel.associations);
@@ -195,197 +195,13 @@ parseAssociations = function(associations, storageType)
     return associations_info;
   }
 
-//association belongsTo only modify the source model
-fillAttributesBelongsTo = function(source_model,association,attributes_schema)
-{
-  let name_attribute = association.as;
-  if(attributes_schema.hasOwnProperty(source_model))
-  {
-    //push the attribute related to associations to the ones existing
-    attributes_schema[source_model]["schema"][name_attribute] = association.target;
-    Object.assign(attributes_schema[source_model]["mutations"], association.foreign_key);
-
-  }else{
-    //insert model for the first time and set attributes related to associations
-    attributes_schema[source_model] = {
-        "schema" : { [name_attribute] : association.target},
-        "mutations" :  association.foreign_key,
-        "resolvers" : {}
-    };
-  }
-}
-
-//association belongsToMany only modify the source model and only the schema (no mutations)
-fillAttributesBelongsToMany = function(source_model,association,attributes_schema)
-{
-  let search_type = association.as+'Search(input : search'+ association.target + 'Input)';
-
-  if(attributes_schema.hasOwnProperty(source_model))
-  {
-    attributes_schema[source_model]["schema"][association.as] = '['+ association.target +']';
-    attributes_schema[source_model]["schema"][search_type] = '['+ association.target +']';
-    attributes_schema[source_model]['resolvers'][association.as] = inflection.pluralize(association.target);
-  }else{
-    attributes_schema[source_model] = {
-        "schema" : { [association.as] : '['+ association.target +']',
-                      [search_type] : '['+ association.target +']'
-                    },
-        "mutations" : {},
-        "resolvers" : { [association.as] : inflection.pluralize(association.target)}
-    };
-  }
-}
-
-//associations hasMany and hasOne modify both source and target models
-fillAttributesHasManyOne = function(source_model,association,attributes_schema)
-{
-  let name_attribute = association.as;
-  let type_attribute = association.target;
-  type_attribute = (association.type === 'hasMany' ?  '['+ type_attribute +']': type_attribute);
-
-  if(attributes_schema.hasOwnProperty(source_model))
-  {
-    //push the attribute related to associations
-    attributes_schema[source_model]["schema"][association.as] = type_attribute;
-  }else{
-    //insert model for the first time and set attributes
-    attributes_schema[source_model] = {
-        "schema" : { [name_attribute] : type_attribute },
-        "mutations" : {},
-        "resolvers" : {}
-    };
-  }
-
-  if(association.type === 'hasMany')
-  {
-    let search_type = association.as+'Search(input : search'+ association.target + 'Input)';
-    attributes_schema[source_model]['schema'][search_type] = type_attribute;
-    attributes_schema[source_model]['resolvers'][association.as] = inflection.pluralize(association.target);
-  }
-
-  if(attributes_schema.hasOwnProperty(association.target))
-  {
-    Object.assign(attributes_schema[association.target]["mutations"], association.foreign_key);
-  }else{
-    attributes_schema[association.target] = {
-      "schema" : {},
-      "mutations" : association.foreign_key,
-      "resolvers" : {}
-    }
-  }
-
-}
-
-module.exports.concatenateExtraAttributes = function(opts, model_extra_attributes) {
-  if(model_extra_attributes === undefined)
-  {
-    opts["foreign_attributesStr"]="";
-    opts["assoc_attributes"]={};
-    opts["non_root_resolvers"]={};
-  }else{
-    opts["foreign_attributesStr"] = attributesToString(model_extra_attributes.mutations);
-    opts["assoc_attributes"] = model_extra_attributes.schema;
-    opts["non_root_resolvers"]= model_extra_attributes.resolvers;
-  }
-}
-
-module.exports.getAllAttributesForSchema = function(opts, attributes_schema)
-{
-  let associations = opts.associations;
-  let source_model = opts.name;
-
-  associations.forEach((association)=>{
-    //depending on the type of association the foreign_key can go
-    //in the source_model or target_model
-    if(association.type === 'belongsTo')
-    {
-      fillAttributesBelongsTo(source_model,association,attributes_schema);
-    }else if(association.type === 'hasOne'|| association.type === 'hasMany'){
-      fillAttributesHasManyOne(source_model,association,attributes_schema);
-    }else if(association.type === 'belongsToMany'){
-      fillAttributesBelongsToMany(source_model,association,attributes_schema);
-    }
-
-  });
-}
-
-
-module.exports.addAssociations = function(associations, summary_associations, source_table)
-{
-    if(!(associations===undefined))
-    {
-      associations.forEach((association) => {
-        if(association.type === 'belongsTo')
-        {
-          summary_associations['one-many'].push(
-            {
-              "source_table" : source_table,
-              "target_table" : association.target_table,
-              "foreign_key" : Object.keys(association.foreign_key)[0]
-            }
-          );
-        }else if(association.type === 'hasMany' || association.type === 'hasOne' ){
-          summary_associations['one-many'].push(
-            {
-              "source_table" : association.target_table,
-              "target_table" : source_table,
-              "foreign_key" : Object.keys(association.foreign_key)[0]
-            }
-          );
-        }else if(association.type === 'belongsToMany'){
-          let through = association.cross_table;
-          //if the cross table hasn't been registered then add it to the summary
-          if(!summary_associations['many-many'].hasOwnProperty(through))
-          {
-            let attributes = {};
-            let references = {};
-
-            for( key in association.source_key)
-            {
-              attributes[key] = association.source_key[key];
-              references[key] = source_table;
-            }
-
-            for( key in association.target_key)
-            {
-              attributes[key] = association.target_key[key];
-              references[key] = association.target_table;
-            }
-
-            summary_associations['many-many'][through] = {
-              "attributes" : attributes,
-              "references" : references
-            };
-          }
-
-        }
-      });
-    }
-}
-
-module.exports.getOpts = function(jsonFile){
-  let dataModel = parseFile(jsonFile);
-  let opts = {
-    name : dataModel.model,
-    table : dataModel.table,
-    nameLc: dataModel.model.toLowerCase(),
-    namePl: inflection.pluralize(dataModel.model.toLowerCase()),
-    attributes: dataModel.attributes,
-    attributesStr: attributesToString(dataModel.attributes),
-    associations: (dataModel.associations===undefined ? [] : dataModel.associations)
-  }
-
-  return opts;
-}
-
-
-module.exports.generateAssociationsMigrations =  function( opts, dir_write){
+generateAssociationsMigrations =  function( opts, dir_write){
 
     opts.associations.implicit_associations.belongsTo.forEach( async (assoc) =>{
       assoc["source"] = opts.table;
       assoc["cross"] = false;
       let generatedMigration = await generateJs('create-association-migration',assoc);
-      let name_migration = module.exports.createNameMigration(dir_write, 'z-column-'+assoc.targetKey+'-to-'+opts.table);
+      let name_migration = createNameMigration(dir_write, 'z-column-'+assoc.targetKey+'-to-'+opts.table);
       fs.writeFile( name_migration, generatedMigration, function(err){
         if (err)
         {
@@ -396,26 +212,10 @@ module.exports.generateAssociationsMigrations =  function( opts, dir_write){
       });
     });
 
-/*
-    opts.associations.explicit_resolvers.belongsTo.forEach( async (assoc) =>{
-      assoc["source"] = opts.table;
-      assoc["cross"] = true;
-      let generatedMigration = await generateJs('create-association-migration',assoc);
-      let name_migration = module.exports.createNameMigration(dir_write, 'z-column-'+assoc.targetKey+'-to-'+opts.table);
-      fs.writeFile( name_migration, generatedMigration, function(err){
-        if (err)
-        {
-          return console.log(err);
-        }else{
-          console.log(name_migration+" writen succesfully!");
-        }
-      });
-    });
-*/
     opts.associations.implicit_associations.belongsToMany.forEach( async (assoc) =>{
       assoc["source"] = opts.table;
       let generatedMigration = await generateJs('create-through-migration',assoc);
-      let name_migration = module.exports.createNameMigration(dir_write, 'z-through-'+assoc.keysIn);
+      let name_migration = createNameMigration(dir_write, 'z-through-'+assoc.keysIn);
       fs.writeFile( name_migration, generatedMigration, function(err){
         if (err)
         {
@@ -427,38 +227,7 @@ module.exports.generateAssociationsMigrations =  function( opts, dir_write){
     });
 }
 
-
-/*
-module.exports.generateAssociationsMigrations =  function( summary_associations, dir_write)
-{
-  //migrations with add column
-  summary_associations['one-many'].forEach( async (assoc_migration) =>{
-    let generatedMigration = await generateJs('create-association-migration',assoc_migration);
-    let name_migration = module.exports.createNameMigration(dir_write, 'z-column-'+assoc_migration.foreign_key+'-to-'+assoc_migration.source_table);
-    fs.writeFile( name_migration, generatedMigration, function(err){
-      if (err)
-      {
-        return console.log(err);
-      }
-    });
-  });
-
-  //migrations with create table (belongsToMany - through)
-  Object.entries(summary_associations['many-many']).forEach( async ([name_assoc, value])=> {
-    value['cross_table'] = name_assoc;
-    let generatedMigration = await generateJs('create-through-migration', value);
-    let name_migration = module.exports.createNameMigration(dir_write, 'z-through-'+name_assoc);
-    fs.writeFile( name_migration, generatedMigration, function(err){
-      if (err)
-      {
-        return console.log(err);
-      }
-    });
-  });
-}
-*/
-
-module.exports.generateSection = async function(section, opts, dir_write )
+generateSection = async function(section, opts, dir_write )
 {
   let generatedSection = await generateJs('create-'+section ,opts);
   fs.writeFile(dir_write, generatedSection, function(err) {
@@ -469,7 +238,7 @@ module.exports.generateSection = async function(section, opts, dir_write )
   });
 }
 
-module.exports.createNameMigration = function(dir_write, model_name)
+createNameMigration = function(dir_write, model_name)
 {
   let date = new Date();
    date = date.toISOString().slice(0,19).replace(/[^0-9]/g, "");
@@ -477,32 +246,86 @@ module.exports.createNameMigration = function(dir_write, model_name)
   return dir_write + '/migrations/' + date + '-'+model_name +'.js';
 }
 
-module.exports.writeCommons = function(dir_write){
+writeCommons = function(dir_write){
   writeSchemaCommons(dir_write);
   writeIndexModelsCommons(dir_write);
 }
 
-module.exports.generateTests = async function(jsonSchema){
-  let opts = module.exports.getOpts(jsonSchema);
+
+module.exports.generateCode = function(json_dir, dir_write)
+{
+  console.log("Generating files...");
+  dir_write = (dir_write===undefined) ? __dirname : dir_write;
+  let sections = ['schemas', 'resolvers', 'models', 'migrations'];
+  let models = [];
   let attributes_schema = {};
-  module.exports.getAllAttributesForSchema(opts,attributes_schema);
-  module.exports.concatenateExtraAttributes(opts,attributes_schema[opts.name]);
+  let summary_associations = {'one-many': [], 'many-many': {}};
 
-  let generatedSchema = await generateJs('create-schemas' , opts);
-  fs.writeFile(__dirname + '/test' +  '/created-schema.js' , generatedSchema, function(err) {
-    if (err)
-      return console.log(err);
-    });
+  // creates one folder for each of schemas, resolvers, models
+  sections.forEach( (section) => {
+    if(!fs.existsSync(dir_write+'/'+section))
+    {
+      fs.mkdirSync(dir_write+'/'+section);
+    }
+  });
 
-  let generatedModel = await generateJs('create-models' , opts);
-  fs.writeFile(__dirname + '/test' +  '/created-model.js' , generatedModel, function(err) {
-    if (err)
-      return console.log(err);
-    });
+  if(!fs.existsSync(dir_write+'/models-webservice'))
+  {
+    fs.mkdirSync(dir_write+'/models-webservice');
+  }
 
-  let generatedResolvers = await generateJs('create-resolvers' , opts);
-  fs.writeFile(__dirname + '/test' +  '/created-resolvers.js' , generatedResolvers, function(err) {
-    if (err)
-      return console.log(err);
-    });
+  //test
+  fs.readdirSync(json_dir).forEach((json_file) => {
+      console.log("Reading...", json_file);
+      let opts = getOptions(json_dir+'/'+json_file);
+      models.push([opts.name , opts.namePl]);
+      console.log(opts.name);
+      //console.log(opts.associations);
+
+      if(opts.storageType === 'sql'){
+        sections.forEach((section) =>{
+            let file_name = "";
+            if(section==='migrations')
+            {
+              file_name = createNameMigration(dir_write,opts.nameLc);
+            }else{
+              file_name = dir_write + '/'+ section +'/' + opts.nameLc + '.js';
+            }
+
+            generateSection(section, opts, file_name)
+            .then( () => {
+                console.log(file_name + ' written succesfully!');
+            });
+        });
+        generateAssociationsMigrations(opts, dir_write);
+      }else if(opts.storageType === 'webservice'){
+          let file_name = "";
+          file_name = dir_write + '/schemas/' + opts.nameLc + '.js';
+          generateSection("schemas",opts,file_name).then( ()=>{
+            console.log(file_name + ' written succesfully!(from webservice)');
+          });
+
+
+          file_name = dir_write + '/models-webservice/' + opts.nameLc + '.js';
+          generateSection("models-webservice",opts,file_name).then( ()=>{
+            console.log(file_name + ' written succesfully!(from webservice)');
+          });
+
+
+          file_name = dir_write + '/resolvers/' + opts.nameLc + '.js';
+          generateSection("resolvers-webservice",opts,file_name).then( ()=>{
+            console.log(file_name + ' written succesfully!(from webservice)');
+          });
+
+      }
+
+  });
+
+  let index_resolvers_file = dir_write + '/resolvers/index.js';
+  generateSection('resolvers-index',{models: models} ,index_resolvers_file)
+  .then( () => {
+    console.log('resolvers-index written succesfully!');
+  });
+
+  writeCommons(dir_write);
 }
