@@ -4,32 +4,24 @@ const test = require('./data-test');
 const funks = require('../funks');
 
 //Generate code
-funks.generateTests(__dirname + '/sample-test.json').then(()=>{});
+funks.generateCode(__dirname + '/test-data-json',__dirname + '/test-data-output' );
 
-//Test for each case with generated code
-describe('Generated code', function(){
-  it('GraphQL schema', function(){
-    fs.readFile(__dirname + '/created-schema.js', 'utf8', (err, data) =>{
-      let test_graphql =  test.graphql.replace(/\s/g, '');
-      let created_graphql = data.replace(/\s/g, '');
-      expect(created_graphql).to.be.equal(test_graphql);
+  //Test for each case with generated code
+  describe('GrpahQL Schemas', function(){
+    it('GraphQL Local Storage Schema', function(){
+      fs.readFile(__dirname + '/test-data-output/schemas/book.js', 'utf8', (err, data) =>{
+        let test_graphql =  test.local_graphql_book.replace(/\s/g, '');
+        let created_graphql = data.replace(/\s/g, '');
+        expect(created_graphql).to.be.equal(test_graphql);
+      });
     });
-  });
 
-  it('Resolvers', function(){
-    fs.readFile(__dirname + '/created-resolvers.js', 'utf8', (err, data) =>{
-      let test_resolver = test.resolver.replace(/\s/g, '');
-      let created_resolver = data.replace(/\s/g, '');
-      expect(created_resolver).to.be.equal(test_resolver);
+    it('GraphQL Webservice Schema', function(){
+      fs.readFile(__dirname + '/test-data-output/schemas/publisher.js', 'utf8', (err, data) =>{
+        let test_graphql = test.webservice_graphql_publiser.replace(/\s/g, '');
+        let created_graphql = data.replace(/\s/g, '');
+        expect(created_graphql).to.be.equal(test_graphql);
+      });
     });
-  });
 
-  it('Sequelize model', function(){
-    fs.readFile(__dirname + '/created-model.js', 'utf8', (err, data)=> {
-      let test_sequelize =  test.sequelize.replace(/\s/g, '');
-      let created_sequelize = data.replace(/\s/g, '');
-      expect(created_sequelize).to.be.equal(test_sequelize);
-    });
   });
-
-});
