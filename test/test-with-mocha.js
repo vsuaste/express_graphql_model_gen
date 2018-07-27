@@ -26,3 +26,23 @@ describe('GrpahQL Schemas', function(){
   });
 
 });
+
+
+describe('Resolvers', function(){
+  it('Local Storage Resolver', function(){
+    fs.readFile(__dirname + '/test-data-output/resolvers/person.js', 'utf8', (err, data) =>{
+      let test_resolver =  test.local_resolver_person.replace(/\s/g, '');
+      let created_resolver = data.replace(/\s/g, '');
+      expect(created_resolver).to.be.equal(test_resolver);
+    });
+  });
+
+  it('Webservice Resolver', function(){
+    fs.readFile(__dirname + '/test-data-output/resolvers/publisher.js', 'utf8', (err, data) =>{
+      let test_resolver = test.webservice_resolver_publisher.replace(/\s/g, '');
+      let created_resolver = data.replace(/\s/g, '');
+      expect(created_resolver).to.be.equal(test_resolver);
+    });
+  });
+
+});

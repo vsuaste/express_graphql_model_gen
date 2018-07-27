@@ -62,3 +62,215 @@ module.exports = \`
   }
 
   \`;`;
+
+module.exports.local_resolver_person = `
+/*
+    Resolvers for basic CRUD operations
+*/
+
+const person = require('../models/index').person;
+const searchArg = require('../utils/search-argument');
+const fileTools = require('../utils/file-tools');
+var checkAuthorization = require('../utils/check-authorization');
+
+person.prototype.dogsFilter = function({
+    input
+}, context) {
+    if (input === undefined) {
+        return this.getDogs({
+            include: [{
+                all: true
+            }]
+        });
+    } else {
+        let arg = new searchArg(input);
+        let arg_sequelize = arg.toSequelize();
+        return this.getDogs({
+            where: arg_sequelize,
+            include: [{
+                all: true
+            }]
+        });
+    }
+}
+person.prototype.booksFilter = function({
+    input
+}, context) {
+    if (input === undefined) {
+        return this.getBooks({
+            include: [{
+                all: true
+            }]
+        });
+    } else {
+        let arg = new searchArg(input);
+        let arg_sequelize = arg.toSequelize();
+        return this.getBooks({
+            where: arg_sequelize,
+            include: [{
+                all: true
+            }]
+        });
+    }
+}
+
+
+
+
+module.exports = {
+
+    people: function({
+        input
+    }, context) {
+        if (checkAuthorization(context, 'people', 'read') == true) {
+            if (input === undefined) {
+                return person.findAll({
+                    include: [{
+                        all: true
+                    }]
+                });
+            } else {
+                let arg = new searchArg(input);
+                let arg_sequelize = arg.toSequelize();
+                return person.findAll({
+                    where: arg_sequelize,
+                    include: [{
+                        all: true
+                    }]
+                });
+            }
+        } else {
+            return "You don't have authorization to perform this action";
+        }
+    },
+
+    readOnePerson: function({
+        id
+    }, context) {
+        if (checkAuthorization(context, 'people', 'read') == true) {
+            return person.findOne({
+                where: {
+                    id: id
+                },
+                include: [{
+                    all: true
+                }]
+            });
+        } else {
+            return "You don't have authorization to perform this action";
+        }
+    },
+
+    addPerson: function(input, context) {
+        if (checkAuthorization(context, 'people', 'create') == true) {
+            return person.create(input)
+                .then(person => {
+                    return person;
+                });
+        } else {
+            return "You don't have authorization to perform this action";
+        }
+    },
+
+    bulkAddPersonXlsx: function(_, context) {
+        let xlsxObjs = fileTools.parseXlsx(context.request.files.xlsx_file.data.toString('binary'));
+        return person.bulkCreate(xlsxObjs, {
+            validate: true
+        });
+    },
+
+    bulkAddPersonCsv: function(_, context) {
+        //delim = context.request.body.delim;
+        //cols = context.request.body.cols;
+        return fileTools.parseCsv(context.request.files.csv_file.data.toString())
+            .then((csvObjs) => {
+                return person.bulkCreate(csvObjs, {
+                    validate: true
+                });
+            });
+    },
+
+    deletePerson: function({
+        id
+    }, context) {
+        if (checkAuthorization(context, 'people', 'delete') == true) {
+            return person.findById(id)
+                .then(person => {
+                    return person.destroy()
+                        .then(() => {
+                            return 'Item succesfully deleted';
+                        });
+                });
+        } else {
+            return "You don't have authorization to perform this action";
+        }
+    },
+
+    updatePerson: function(input, context) {
+        if (checkAuthorization(context, 'people', 'update') == true) {
+            return person.findById(input.id)
+                .then(person => {
+                    return person.update(input);
+                });
+        } else {
+            return "You don't have authorization to perform this action";
+        }
+    }
+}
+`;
+
+
+module.exports.webservice_resolver_publisher = `
+const publisher = require('../models-webservice/publisher');
+const searchArg = require('../utils/search-argument');
+const resolvers = require('./index');
+
+
+
+publisher.prototype.booksFilter = function({
+    input
+}, context) {
+    if (input === undefined) {
+        return resolvers.books({
+            "input": {
+                "field": "publisherId",
+                "value": {
+                    "value": this.id
+                },
+                "operator": "eq"
+            }
+        }, context);
+    } else {
+        return resolvers.books({
+                "input": input
+            }, context)
+            .then((result) => {
+                return result.filter(item => {
+                    if (item.publisherId == this.id) {
+                        return true;
+                    }
+                });
+            });
+    }
+
+}
+
+
+
+module.exports = {
+    publishers: function({
+        input
+    }, context) {
+        /*
+        YOUR CODE GOES HERE
+        */
+    },
+
+    readOnePublisher: function({
+        id
+    }, context) {
+        /*
+        YOUR CODE GOES HERE
+        */
+    }
+}`;
