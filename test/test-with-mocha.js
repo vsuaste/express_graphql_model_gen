@@ -46,3 +46,22 @@ describe('Resolvers', function(){
   });
 
 });
+
+describe('Models', function(){
+  it('Local Storage Model', function(){
+    fs.readFile(__dirname + '/test-data-output/models/person.js', 'utf8', (err, data) =>{
+      let test_model =  test.local_model_person.replace(/\s/g, '');
+      let created_model = data.replace(/\s/g, '');
+      expect(created_model).to.be.equal(test_model);
+    });
+  });
+
+  it('Webservice Model', function(){
+    fs.readFile(__dirname + '/test-data-output/models-webservice/publisher.js', 'utf8', (err, data) =>{
+      let test_model = test.webservice_model_publisher.replace(/\s/g, '');
+      let created_model = data.replace(/\s/g, '');
+      expect(created_model).to.be.equal(test_model);
+    });
+  });
+
+});

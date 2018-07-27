@@ -274,3 +274,48 @@ module.exports = {
         */
     }
 }`;
+
+module.exports.local_model_person = `
+'use strict';
+
+module.exports = function(sequelize, DataTypes) {
+    var Person = sequelize.define('person', {
+
+        firstName: {
+            type: Sequelize.STRING
+        },
+
+        lastName: {
+            type: Sequelize.STRING
+        },
+
+        email: {
+            type: Sequelize.STRING
+        },
+    });
+
+    Person.associate = function(models) {
+        Person.hasMany(models.dog);
+        Person.belongsToMany(models.book, {
+            through: 'books_to_people'
+        });
+    };
+
+    return Person;
+};
+`;
+
+module.exports.webservice_model_publisher = `
+  module.exports = class publisher {
+
+      constructor({
+          id,
+          name,
+          phone
+      }) {
+          this.id = id;
+          this.name = name;
+          this.phone = phone;
+      }
+  }
+`;
