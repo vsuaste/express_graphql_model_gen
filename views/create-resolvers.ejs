@@ -46,11 +46,7 @@ var checkAuthorization = require('../utils/check-authorization');
     {
       return <%=associations_temp[i].target.toLowerCase()%>.<%=associations_temp[i].target_pl%>({"input":{"field" : <%=associations_temp[i].targetKey%>, "value":{"value":this.id }, "operator": "eq"} }, context);
     }else{
-
-      return <%=associations_temp[i].target.toLowerCase()%>.<%=associations_temp[i].target_pl%>({"input":input},context)
-      .then( (result) => {
-        return result.filter( item => { if(item.<%=associations_temp[i].targetKey%> == this.id){return true;} } );
-      });
+      return <%=associations_temp[i].target.toLowerCase()%>.<%=associations_temp[i].target_pl%>({"input":{"operator":"and", "searchArg":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.id }, "operator": "eq"} , input] } },context)
     }
 
   }

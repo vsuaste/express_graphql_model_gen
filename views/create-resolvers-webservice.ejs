@@ -23,10 +23,7 @@ const resolvers = require('./index');
     {
       return resolvers.<%=associations_temp[i].target_pl.toLowerCase()%>({"input":{"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.id }, "operator": "eq"}},context);
     }else{
-      return resolvers.<%=associations_temp[i].target_pl.toLowerCase()%>({"input":input},context)
-      .then( (result) => {
-          return result.filter( item => {if(item.<%=associations_temp[i].targetKey%> == this.id){return true;} });
-      });
+      return resolvers.<%=associations_temp[i].target_pl.toLowerCase()%>({"input":{"operator":"and", "searchArg":[ {"field" : "<%=associations_temp[i].targetKey%>", "value":{"value":this.id }, "operator": "eq"} , input] } },context)
     }
 
   }
