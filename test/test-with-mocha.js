@@ -10,16 +10,16 @@ funks.generateCode(__dirname + '/test-data-json',__dirname + '/test-data-output'
 //Test for each case with generated code
 describe('GrpahQL Schemas', function(){
   it('GraphQL Local Storage Schema', function(){
-    fs.readFile(__dirname + '/test-data-output/schemas/book.js', 'utf8', (err, data) =>{
-      let test_graphql =  test.local_graphql_book.replace(/\s/g, '');
+    fs.readFile(__dirname + '/test-data-output/schemas/project.js', 'utf8', (err, data) =>{
+      let test_graphql =  test.local_graphql_project.replace(/\s/g, '');
       let created_graphql = data.replace(/\s/g, '');
       expect(created_graphql).to.be.equal(test_graphql);
     });
   });
 
   it('GraphQL Webservice Schema', function(){
-    fs.readFile(__dirname + '/test-data-output/schemas/publisher.js', 'utf8', (err, data) =>{
-      let test_graphql = test.webservice_graphql_publiser.replace(/\s/g, '');
+    fs.readFile(__dirname + '/test-data-output/schemas/specie.js', 'utf8', (err, data) =>{
+      let test_graphql = test.webservice_graphql_specie.replace(/\s/g, '');
       let created_graphql = data.replace(/\s/g, '');
       expect(created_graphql).to.be.equal(test_graphql);
     });
@@ -30,16 +30,16 @@ describe('GrpahQL Schemas', function(){
 
 describe('Resolvers', function(){
   it('Local Storage Resolver', function(){
-    fs.readFile(__dirname + '/test-data-output/resolvers/person.js', 'utf8', (err, data) =>{
-      let test_resolver =  test.local_resolver_person.replace(/\s/g, '');
+    fs.readFile(__dirname + '/test-data-output/resolvers/project.js', 'utf8', (err, data) =>{
+      let test_resolver =  test.local_resolver_project.replace(/\s/g, '');
       let created_resolver = data.replace(/\s/g, '');
       expect(created_resolver).to.be.equal(test_resolver);
     });
   });
 
   it('Webservice Resolver', function(){
-    fs.readFile(__dirname + '/test-data-output/resolvers/publisher.js', 'utf8', (err, data) =>{
-      let test_resolver = test.webservice_resolver_publisher.replace(/\s/g, '');
+    fs.readFile(__dirname + '/test-data-output/resolvers/specie.js', 'utf8', (err, data) =>{
+      let test_resolver = test.webservice_resolver_specie.replace(/\s/g, '');
       let created_resolver = data.replace(/\s/g, '');
       expect(created_resolver).to.be.equal(test_resolver);
     });
@@ -49,16 +49,16 @@ describe('Resolvers', function(){
 
 describe('Models', function(){
   it('Local Storage Model', function(){
-    fs.readFile(__dirname + '/test-data-output/models/person.js', 'utf8', (err, data) =>{
-      let test_model =  test.local_model_person.replace(/\s/g, '');
+    fs.readFile(__dirname + '/test-data-output/models/researcher.js', 'utf8', (err, data) =>{
+      let test_model =  test.local_model_researcher.replace(/\s/g, '');
       let created_model = data.replace(/\s/g, '');
       expect(created_model).to.be.equal(test_model);
     });
   });
 
   it('Webservice Model', function(){
-    fs.readFile(__dirname + '/test-data-output/models-webservice/publisher.js', 'utf8', (err, data) =>{
-      let test_model = test.webservice_model_publisher.replace(/\s/g, '');
+    fs.readFile(__dirname + '/test-data-output/models-webservice/specie.js', 'utf8', (err, data) =>{
+      let test_model = test.webservice_model_specie.replace(/\s/g, '');
       let created_model = data.replace(/\s/g, '');
       expect(created_model).to.be.equal(test_model);
     });

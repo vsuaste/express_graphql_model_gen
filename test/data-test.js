@@ -1,83 +1,88 @@
-module.exports.local_graphql_book = `
+module.exports.local_graphql_project = `
 module.exports = \`
-  type Book  {
-      title: String
-      genre: String
-        publisher: Publisher
-        peopleFilter(input: searchPersonInput): [Person]
+  type Project  {
+      name: String
+      description: String
+        specie: Specie
+        researchersFilter(input: searchResearcherInput): [Researcher]
   }
 
-  enum BookField {
+  enum ProjectField {
     id
-    title
-    genre
+    name
+    description
   }
 
-  input searchBookInput {
-    field: BookField
+  input searchProjectInput {
+    field: ProjectField
     value: typeValue
     operator: Operator
-    searchArg: [searchBookInput]
+    searchArg: [searchProjectInput]
   }
 
   type Query {
-    books(input: searchBookInput): [Book]
-    readOneBook(id: ID!): Book
+    projects(input: searchProjectInput): [Project]
+    readOneProject(id: ID!): Project
   }
 
     type Mutation {
-    addBook( title: String, genre: String, publisherId: Int   ): Book
-    deleteBook(id: ID!): String!
-    updateBook(id: ID!, title: String, genre: String, publisherId: Int  ): Book!
-    bulkAddBookXlsx: [Book]
-    bulkAddBookCsv: [Book]
+    addProject( name: String, description: String, specieId: Int   ): Project
+    deleteProject(id: ID!): String!
+    updateProject(id: ID!, name: String, description: String, specieId: Int  ): Project!
+    bulkAddProjectXlsx: [Project]
+    bulkAddProjectCsv: [Project]
 }
   \`;`;
 
 
-module.exports.webservice_graphql_publiser = `
+module.exports.webservice_graphql_specie = `
 module.exports = \`
-  type Publisher  {
-      name: String
-      phone: String
-          booksFilter(input: searchBookInput): [Book]
+  type Specie  {
+      nombre: String
+      e_nombre_comun_principal: String
+      e_foto_principal: String
+      nombre_cientifico: String
+          projectsFilter(input: searchProjectInput): [Project]
   }
 
-  enum PublisherField {
+  enum SpecieField {
     id
-    name
-    phone
+    nombre
+    e_nombre_comun_principal
+    e_foto_principal
+    nombre_cientifico
   }
 
-  input searchPublisherInput {
-    field: PublisherField
+  input searchSpecieInput {
+    field: SpecieField
     value: typeValue
     operator: Operator
-    searchArg: [searchPublisherInput]
+    searchArg: [searchSpecieInput]
   }
 
   type Query {
-    publishers(input: searchPublisherInput): [Publisher]
-    readOnePublisher(id: ID!): Publisher
+    species(input: searchSpecieInput): [Specie]
+    readOneSpecie(id: ID!): Specie
   }
 
   \`;`;
 
-module.exports.local_resolver_person = `
+module.exports.local_resolver_project = `
 /*
     Resolvers for basic CRUD operations
 */
 
-const person = require('../models/index').person;
+const project = require('../models/index').project;
 const searchArg = require('../utils/search-argument');
 const fileTools = require('../utils/file-tools');
 var checkAuthorization = require('../utils/check-authorization');
+const specie = require('./specie');
 
-person.prototype.dogsFilter = function({
+project.prototype.researchersFilter = function({
     input
 }, context) {
     if (input === undefined) {
-        return this.getDogs({
+        return this.getResearchers({
             include: [{
                 all: true
             }]
@@ -85,7 +90,7 @@ person.prototype.dogsFilter = function({
     } else {
         let arg = new searchArg(input);
         let arg_sequelize = arg.toSequelize();
-        return this.getDogs({
+        return this.getResearchers({
             where: arg_sequelize,
             include: [{
                 all: true
@@ -93,25 +98,10 @@ person.prototype.dogsFilter = function({
         });
     }
 }
-person.prototype.booksFilter = function({
-    input
-}, context) {
-    if (input === undefined) {
-        return this.getBooks({
-            include: [{
-                all: true
-            }]
-        });
-    } else {
-        let arg = new searchArg(input);
-        let arg_sequelize = arg.toSequelize();
-        return this.getBooks({
-            where: arg_sequelize,
-            include: [{
-                all: true
-            }]
-        });
-    }
+project.prototype.specie = function(_, context) {
+    return specie.readOneSpecie({
+        "id": this.specieId
+    }, context);
 }
 
 
@@ -119,12 +109,12 @@ person.prototype.booksFilter = function({
 
 module.exports = {
 
-    people: function({
+    projects: function({
         input
     }, context) {
-        if (checkAuthorization(context, 'people', 'read') == true) {
+        if (checkAuthorization(context, 'projects', 'read') == true) {
             if (input === undefined) {
-                return person.findAll({
+                return project.findAll({
                     include: [{
                         all: true
                     }]
@@ -132,7 +122,7 @@ module.exports = {
             } else {
                 let arg = new searchArg(input);
                 let arg_sequelize = arg.toSequelize();
-                return person.findAll({
+                return project.findAll({
                     where: arg_sequelize,
                     include: [{
                         all: true
@@ -144,11 +134,11 @@ module.exports = {
         }
     },
 
-    readOnePerson: function({
+    readOneProject: function({
         id
     }, context) {
-        if (checkAuthorization(context, 'people', 'read') == true) {
-            return person.findOne({
+        if (checkAuthorization(context, 'projects', 'read') == true) {
+            return project.findOne({
                 where: {
                     id: id
                 },
@@ -161,42 +151,42 @@ module.exports = {
         }
     },
 
-    addPerson: function(input, context) {
-        if (checkAuthorization(context, 'people', 'create') == true) {
-            return person.create(input)
-                .then(person => {
-                    return person;
+    addProject: function(input, context) {
+        if (checkAuthorization(context, 'projects', 'create') == true) {
+            return project.create(input)
+                .then(project => {
+                    return project;
                 });
         } else {
             return "You don't have authorization to perform this action";
         }
     },
 
-    bulkAddPersonXlsx: function(_, context) {
+    bulkAddProjectXlsx: function(_, context) {
         let xlsxObjs = fileTools.parseXlsx(context.request.files.xlsx_file.data.toString('binary'));
-        return person.bulkCreate(xlsxObjs, {
+        return project.bulkCreate(xlsxObjs, {
             validate: true
         });
     },
 
-    bulkAddPersonCsv: function(_, context) {
+    bulkAddProjectCsv: function(_, context) {
         //delim = context.request.body.delim;
         //cols = context.request.body.cols;
         return fileTools.parseCsv(context.request.files.csv_file.data.toString())
             .then((csvObjs) => {
-                return person.bulkCreate(csvObjs, {
+                return project.bulkCreate(csvObjs, {
                     validate: true
                 });
             });
     },
 
-    deletePerson: function({
+    deleteProject: function({
         id
     }, context) {
-        if (checkAuthorization(context, 'people', 'delete') == true) {
-            return person.findById(id)
-                .then(person => {
-                    return person.destroy()
+        if (checkAuthorization(context, 'projects', 'delete') == true) {
+            return project.findById(id)
+                .then(project => {
+                    return project.destroy()
                         .then(() => {
                             return 'Item succesfully deleted';
                         });
@@ -206,11 +196,11 @@ module.exports = {
         }
     },
 
-    updatePerson: function(input, context) {
-        if (checkAuthorization(context, 'people', 'update') == true) {
-            return person.findById(input.id)
-                .then(person => {
-                    return person.update(input);
+    updateProject: function(input, context) {
+        if (checkAuthorization(context, 'projects', 'update') == true) {
+            return project.findById(input.id)
+                .then(project => {
+                    return project.update(input);
                 });
         } else {
             return "You don't have authorization to perform this action";
@@ -220,20 +210,19 @@ module.exports = {
 `;
 
 
-module.exports.webservice_resolver_publisher = `
-const publisher = require('../models-webservice/publisher');
+module.exports.webservice_resolver_specie = `
+const specie = require('../models-webservice/specie');
 const searchArg = require('../utils/search-argument');
 const resolvers = require('./index');
 
 
-
-publisher.prototype.booksFilter = function({
+specie.prototype.projectsFilter = function({
     input
 }, context) {
     if (input === undefined) {
-        return resolvers.books({
+        return resolvers.projects({
             "input": {
-                "field": "publisherId",
+                "field": "specieId",
                 "value": {
                     "value": this.id
                 },
@@ -241,16 +230,18 @@ publisher.prototype.booksFilter = function({
             }
         }, context);
     } else {
-        return resolvers.books({
-                "input": input
-            }, context)
-            .then((result) => {
-                return result.filter(item => {
-                    if (item.publisherId == this.id) {
-                        return true;
-                    }
-                });
-            });
+        return resolvers.projects({
+            "input": {
+                "operator": "and",
+                "searchArg": [{
+                    "field": "specieId",
+                    "value": {
+                        "value": this.id
+                    },
+                    "operator": "eq"
+                }, input]
+            }
+        }, context)
     }
 
 }
@@ -258,7 +249,7 @@ publisher.prototype.booksFilter = function({
 
 
 module.exports = {
-    publishers: function({
+    species: function({
         input
     }, context) {
         /*
@@ -266,46 +257,18 @@ module.exports = {
         */
     },
 
-    readOnePublisher: function({
+    readOneSpecie: function({
         id
     }, context) {
         /*
         YOUR CODE GOES HERE
         */
+
     }
-}`;
-
-module.exports.local_model_person = `
-'use strict';
-
-module.exports = function(sequelize, DataTypes) {
-    var Person = sequelize.define('person', {
-
-        firstName: {
-            type: Sequelize.STRING
-        },
-
-        lastName: {
-            type: Sequelize.STRING
-        },
-
-        email: {
-            type: Sequelize.STRING
-        },
-    });
-
-    Person.associate = function(models) {
-        Person.hasMany(models.dog);
-        Person.belongsToMany(models.book, {
-            through: 'books_to_people'
-        });
-    };
-
-    return Person;
-};
+}
 `;
 
-module.exports.webservice_model_publisher = `
+module.exports.webservice_model_specie = `
   module.exports = class publisher {
 
       constructor({
@@ -318,4 +281,36 @@ module.exports.webservice_model_publisher = `
           this.phone = phone;
       }
   }
+`;
+
+module.exports.local_model_researcher = `
+'use strict';
+
+module.exports = function(sequelize, DataTypes) {
+    var Researcher = sequelize.define('researcher', {
+
+        firstName: {
+            type: Sequelize.STRING
+        },
+
+        lastName: {
+            type: Sequelize.STRING
+        },
+
+        email: {
+            type: Sequelize.STRING
+        },
+
+
+
+    });
+
+    Researcher.associate = function(models) {
+        Researcher.belongsToMany(models.project, {
+            through: 'project_to_researcher'
+        });
+    };
+
+    return Researcher;
+};
 `;
