@@ -65,3 +65,32 @@ describe('Models', function(){
   });
 
 });
+
+
+describe('Migrations', function(){
+  it('Local Migration', function(){
+
+    fs.readdirSync(__dirname + '/test-data-output/migrations')
+    .filter(function(file){
+      return (file.slice(-14)==='-researcher.js');
+    }).forEach(function(file){
+      console.log("Files: ",file);
+      fs.readFile(__dirname + '/test-data-output/migrations/'+file, 'utf8', (err, data) =>{
+        let test_migration =  test.local_migration_researcher.replace(/\s/g, '');
+        let created_migration = data.replace(/\s/g, '');
+        expect(created_migration).to.be.equal(test_migration);
+      });
+    })
+
+
+  });
+
+  // it('Through Migration', function(){
+  //   fs.readFile(__dirname + '/test-data-output/models-webservice/specie.js', 'utf8', (err, data) =>{
+  //     let test_model = test.webservice_model_specie.replace(/\s/g, '');
+  //     let created_model = data.replace(/\s/g, '');
+  //     expect(created_model).to.be.equal(test_model);
+  //   });
+  // });
+
+});

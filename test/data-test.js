@@ -269,18 +269,22 @@ module.exports = {
 `;
 
 module.exports.webservice_model_specie = `
-  module.exports = class publisher {
+module.exports = class specie {
 
-      constructor({
-          id,
-          name,
-          phone
-      }) {
-          this.id = id;
-          this.name = name;
-          this.phone = phone;
-      }
-  }
+    constructor({
+        id,
+        nombre,
+        e_nombre_comun_principal,
+        e_foto_principal,
+        nombre_cientifico
+    }) {
+        this.id = id;
+        this.nombre = nombre;
+        this.e_nombre_comun_principal = e_nombre_comun_principal;
+        this.e_foto_principal = e_foto_principal;
+        this.nombre_cientifico = nombre_cientifico;
+    }
+}
 `;
 
 module.exports.local_model_researcher = `
@@ -312,5 +316,52 @@ module.exports = function(sequelize, DataTypes) {
     };
 
     return Researcher;
+};
+`;
+
+module.exports.local_migration_researcher = `
+'use strict';
+
+module.exports = {
+
+    up: function(queryInterface, Sequelize) {
+        return queryInterface.createTable('researchers', {
+
+            id: {
+                type: Sequelize.INTEGER,
+                autoIncrement: true,
+                primaryKey: true
+            },
+
+            createdAt: {
+                type: Sequelize.DATE
+            },
+
+            updatedAt: {
+                type: Sequelize.DATE
+            },
+
+
+            firstName: {
+                type: Sequelize.STRING
+            },
+
+            lastName: {
+                type: Sequelize.STRING
+            },
+
+            email: {
+                type: Sequelize.STRING
+            },
+
+
+
+        });
+    },
+
+    down: function(queryInterface, Sequelize) {
+        return queryInterface.dropTable('researchers');
+    }
+
 };
 `;
