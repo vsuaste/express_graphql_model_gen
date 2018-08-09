@@ -65,6 +65,11 @@ writeSchemaCommons = function(dir_write){
     value: String!
   }
 
+  enum Order{
+    DESC
+    ASC
+  }
+
 \`;`;
 
   fs.writeFile(dir_write + '/schemas/' +  'commons.js' , commons, function(err) {
